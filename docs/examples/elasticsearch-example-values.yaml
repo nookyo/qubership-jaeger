@@ -1,0 +1,22 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+jaeger:
+  storage:
+    type: elasticsearch
+
+# cassandraSchemaJob will be ignored if jaeger.storage.type is set to elasticsearch.
+elasticsearch:
+  client:
+    username: admin
+    password: admin
+    scheme: https
+    url: opensearch.opensearch.svc:443
+  indexCleaner:
+    install: true
+
+collector:
+  install: true
+
+query:
+  install: true

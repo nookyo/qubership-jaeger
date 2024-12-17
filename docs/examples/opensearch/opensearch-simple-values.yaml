@@ -1,0 +1,33 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+jaeger:
+  storage:
+    type: elasticsearch
+
+# cassandraSchemaJob is ignored if jaeger.storage.type is set to elasticsearch.
+elasticsearch:
+  client:
+    username: ...replace by username...
+    password: ...replace by password...
+    scheme: https
+    url: opensearch.opensearch.svc:9200
+  indexCleaner:
+    install: true
+
+collector:
+  install: true
+
+query:
+  install: true
+  ingress:
+    install: true
+    host: query.<cloud_dns_name>
+
+# This section is optional and allow to deploy a test service to generate some traces
+# Useful if you want to verify how Jaeger receive, store and show traces
+hotrod:
+  install: true
+  ingress:
+    install: true
+    host: hotrod.<cloud_dns_name>

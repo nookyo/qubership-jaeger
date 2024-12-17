@@ -1,0 +1,74 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+jaeger:
+  storage:
+    type: cassandra
+
+cassandraSchemaJob:
+  host: cassandra.cassandra.svc
+  keyspace: jaeger
+  password: admin
+  username: admin
+  datacenter: dc1
+
+  # This parameter responsible for with either with SimpleStrategy (without replication)
+  # or with NetworkReplicationStrategy (with replication):
+  # * prod - will use NetworkReplicationStrategy
+  # * test - will use SimpleStrategy
+  mode: prod
+
+collector:
+  install: true
+
+  # This parameter allow to specify number of jaeger collector service replicas.
+  # If collector should be run in High Available mode need specify 2 or more replicas.
+  replicas: 2
+
+  # Affinity need to tell Kubernetes schedule pod on different nodes and avoid situation when two
+  # replicas will run on the same node (and both replicas will unavailable with node in disaster case)
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            -  jaeger-collector
+        topologyKey: kubernetes.io/hostname
+
+query:
+  install: true
+
+  # This parameter allow to specify number of jaeger query service replicas.
+  # If collector should be run in High Available mode need specify 2 or more replicas.
+  #
+  # But unlike from collector service, the query service need only to see already collected data.
+  # And it unavailability doesn't affect the process of receiving and store traces.
+  replicas: 2
+  ingress:
+    install: true
+    host: query.<cloud_dns_name>
+
+  # Affinity need to tell Kubernetes schedule pod on different nodes and avoid situation when two
+  # replicas will run on the same node (and both replicas will unavailable with node in disaster case)
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            -  jaeger-query
+        topologyKey: kubernetes.io/hostname
+
+
+# This section is optional and allow to deploy a test service to generate some traces
+# Useful if you want to verify how Jaeger receive, store and show traces
+hotrod:
+  install: true
+  ingress:
+    install: true
+    host: hotrod.<cloud_dns_name>

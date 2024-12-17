@@ -1,0 +1,109 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+jaeger:
+  storage:
+    type: cassandra
+
+cassandraSchemaJob:
+  host: cassandra.cassandra.svc
+  keyspace: jaeger
+  password: admin
+  username: admin
+  datacenter: dc1
+
+  # This parameter responsible for with either with SimpleStrategy (without replication)
+  # or with NetworkReplicationStrategy (with replication):
+  # * prod - will use NetworkReplicationStrategy
+  # * test - will use SimpleStrategy
+  mode: prod
+
+  # This block allow to specify custom settings for Cassandra TTL
+  # By default all traces store only 2 days, and all dependencies stored forever
+  ttl:
+    # two weeks in seconds
+    trace: 1209600
+    # let's store dependencies forever
+    dependencies: 0
+
+collector:
+  install: true
+
+query:
+  install: true
+  ingress:
+    install: true
+    host: query.<cloud_dns_name>
+
+# By default the agent wont' deploy, so need explicitly specify that agent should be deploy.
+agent:
+  install: true
+
+# This section is optional and allow to deploy a test service to generate some traces
+# Useful if you want to verify how Jaeger receive, store and show traces
+hotrod:
+  install: true
+  ingress:
+    install: true
+    host: hotrod.<cloud_dns_name>
+
+integrationTests:
+  install: true
+  image: "ghcr.io/netcracker/jaeger-integration-tests:main"
+  tags: "smokeORha"
+  linkForGenerator: "https://jaeger-collector-host"
+  generateCount: 10
+  waitingTime: 500ms
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 50m
+    limits:
+      memory: 256Mi
+      cpu: 400m
+  statusWriting:
+    enabled: true
+    isShortStatusMessage: true
+    onlyIntegrationTests: true
+    customResourcePath: "apps/v1/jaeger/deployments/jaeger-integration-tests-runner"
+  service:
+    name: jaeger-integration-tests-runner
+  serviceAccount:
+    create: true
+    name: "jaeger-integration-tests"
+  securityContext:
+    runAsUser: 2000
+    fsGroup: 2000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+statusProvisioner:
+  enabled: true
+  image: ghcr.io/netcracker/deployment-status-provisioner:main
+  lifetimeAfterCompletion: 300
+  podReadinessTimeout: 300
+  integrationTestsTimeout: 300
+  resources:
+    requests:
+      memory: "50Mi"
+      cpu: "50m"
+    limits:
+      memory: "100Mi"
+      cpu: "100m"
+  securityContext:
+    runAsUser: 2000
+    fsGroup: 2000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL

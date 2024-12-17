@@ -1,0 +1,26 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# This examples show how to specify the custom images to override default images
+collector:
+  image: jaegertracing/jaeger-collector:latest
+query:
+  image: jaegertracing/jaeger-query:latest
+proxy:
+  image: envoyproxy/envoy:v1.25.8
+agent:
+  image: jaegertracing/jaeger-agent:latest
+cassandraSchemaJob:
+  image: jaegertracing/jaeger-cassandra-schema:latest
+hotrod:
+  image: jaegertracing/example-hotrod:latest
+elasticsearch:
+  indexCleaner:
+    image: jaegertracing/jaeger-es-index-cleaner:latest
+  rollover:
+    image: jaegertracing/jaeger-es-rollover:latest
+integrationTests:
+  image: ghcr.io/netcracker/jaeger-integration-tests:main
+statusProvisioner:
+  image: ghcr.io/netcracker/deployment-status-provisioner:main

@@ -1,0 +1,20 @@
+{{- if and .Values.integrationTests.install }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.integrationTests.service.name }}
+  labels:
+    name: {{ .Values.integrationTests.service.name }}
+    app.kubernetes.io/name: {{ .Values.integrationTests.service.name }}
+    app.kubernetes.io/instance: {{ cat .Values.integrationTests.service.name "-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: jaeger-integration-tests
+    app.kubernetes.io/part-of: jaeger
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+  selector:
+    name: {{ .Values.integrationTests.service.name }}
+{{- end }}

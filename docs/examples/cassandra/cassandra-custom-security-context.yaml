@@ -1,0 +1,69 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+jaeger:
+  storage:
+    type: cassandra
+
+cassandraSchemaJob:
+  host: cassandra.cassandra.svc
+  keyspace: jaeger
+  password: admin
+  username: admin
+  datacenter: dc1
+
+  # This parameter responsible for with either with SimpleStrategy (without replication)
+  # or with NetworkReplicationStrategy (with replication):
+  # * prod - will use NetworkReplicationStrategy
+  # * test - will use SimpleStrategy
+  mode: prod
+
+collector:
+  install: true
+  securityContext:
+    runAsUser: 2000
+    fsGroup: 2000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+query:
+  install: true
+  securityContext:
+    runAsUser: 2000
+    fsGroup: 2000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  ingress:
+    install: true
+    host: query.<cloud_dns_name>
+
+# This section is optional and allow to deploy a test service to generate some traces
+# Useful if you want to verify how Jaeger receive, store and show traces
+hotrod:
+  install: true
+  securityContext:
+    runAsUser: 2000
+    fsGroup: 2000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  ingress:
+    install: true
+    host: hotrod.<cloud_dns_name>

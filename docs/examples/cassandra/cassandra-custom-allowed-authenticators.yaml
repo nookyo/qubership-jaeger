@@ -1,0 +1,18 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+cassandraSchemaJob:
+  host: cassandra.cassandra.svc
+  port: 9043
+  username: admin
+  password: admin
+  mode: prod
+  keyspace: jaeger
+  datacenter: dc1
+
+  # This section allow to override list of default allowed authenticators during deploy
+  allowedAuthenticators:
+    - org.apache.cassandra.auth.PasswordAuthenticator
+    - com.instaclustr.cassandra.auth.SharedSecretAuthenticator
+    - com.datastax.bdp.cassandra.auth.DseAuthenticator

@@ -1,0 +1,80 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+jaeger:
+  storage:
+    type: "elasticsearch"
+
+# cassandraSchemaJob is ignored if jaeger.storage.type is set to elasticsearch.
+elasticsearch:
+  client:
+    username: admin
+    password: admin
+    scheme: https
+    url: elasticsearch.elasticsearch.svc:9200
+  rollover:
+    install: true
+    schedule: "10 0 * * *"
+    successfulJobsHistoryLimit: 1
+    failedJobsHistoryLimit: 1
+    securityContext:
+      runAsUser: 2000
+      fsGroup: 2000
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
+collector:
+  install: true
+  securityContext:
+    runAsUser: 2000
+    fsGroup: 2000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+query:
+  install: true
+  securityContext:
+    runAsUser: 2000
+    fsGroup: 2000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  ingress:
+    install: true
+    host: query.<cloud_dns_name>
+
+# This section is optional and allow to deploy a test service to generate some traces
+# Useful if you want to verify how Jaeger receive, store and show traces
+hotrod:
+  install: true
+  securityContext:
+    runAsUser: 2000
+    fsGroup: 2000
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  ingress:
+    install: true
+    host: hotrod.<cloud_dns_name>

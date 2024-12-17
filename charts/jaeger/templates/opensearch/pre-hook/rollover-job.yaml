@@ -1,0 +1,146 @@
+{{- if .Values.elasticsearch.rollover.install }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.jaeger.serviceName }}-rollover-init
+  labels:
+    name: {{ .Values.jaeger.serviceName }}-rollover-init
+    app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-rollover-init
+    app.kubernetes.io/instance: {{ cat .Values.jaeger.serviceName "-rollover-init-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: jaeger
+    {{- include "jaeger.commonLabels" . | nindent 4 }}
+    {{- if .Values.elasticsearch.rollover.labels }}
+      {{- toYaml .Values.elasticsearch.rollover.labels | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- if .Values.elasticsearch.rollover.annotations }}
+      {{- toYaml .Values.elasticsearch.rollover.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if semverCompare ">=1.21-0" .Capabilities.KubeVersion.GitVersion }}
+  ttlSecondsAfterFinished: {{ .Values.elasticsearch.rollover.initHook.ttlSecondsAfterFinished }}
+  {{- end }}
+  template:
+    metadata:
+      {{- if .Values.elasticsearch.rollover.annotations }}
+      annotations:
+        {{- toYaml .Values.elasticsearch.rollover.annotations | nindent 8 }}
+      {{- end }}
+      labels:
+        name: {{ .Values.jaeger.serviceName }}-rollover-init
+        app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-rollover-init
+        app.kubernetes.io/instance: {{ cat .Values.jaeger.serviceName "-rollover-init-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+        app.kubernetes.io/component: jaeger
+        {{- include "jaeger.commonLabels" . | nindent 8 }}
+        app.kubernetes.io/managed-by: Helm
+        {{- if .Values.elasticsearch.rollover.labels }}
+          {{- toYaml .Values.elasticsearch.rollover.labels | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ .Values.jaeger.serviceName }}-rollover-init
+      securityContext:
+        {{- include "elasticsearch.rolloverjob.securityContext" . }}
+      restartPolicy: OnFailure
+      {{- if .Values.elasticsearch.rollover.affinity }}
+      affinity:
+        {{- toYaml .Values.elasticsearch.rollover.affinity | nindent 8 }}
+      {{- end }}
+      {{- if .Values.elasticsearch.rollover.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.elasticsearch.rollover.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.elasticsearch.rollover.tolerations }}
+      tolerations:
+        {{- toYaml .Values.elasticsearch.rollover.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.elasticsearch.rollover.priorityClassName }}
+      priorityClassName: {{ .Values.elasticsearch.rollover.priorityClassName }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.elasticsearch.rollover.initHook.name }}
+          image: {{ template "rollover.image" . }}
+          imagePullPolicy: IfNotPresent
+          args:
+            - init
+            - {{ include "elasticsearch.url" . }}
+          env:
+            - name: ES_SERVER_URLS
+              value: {{ include "elasticsearch.url" . }}
+            - name: ES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jaeger.serviceName }}-elasticsearch-rollover-init
+                  key: username
+            - name: ES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.jaeger.serviceName }}-elasticsearch-rollover-init
+                  key: password
+            {{- if .Values.elasticsearch.client.tls.enabled }}
+            - name: ES_TLS_ENABLED
+              value: {{ .Values.elasticsearch.client.tls.enabled | quote }}
+              {{- if or .Values.elasticsearch.client.tls.existingSecret (or .Values.elasticsearch.client.tls.ca .Values.elasticsearch.client.tls.cert .Values.elasticsearch.client.tls.key) }}
+            - name: ES_TLS_CA
+              value: /es-tls/ca-cert.pem
+            - name: ES_TLS_CERT
+              value: /es-tls/client-cert.pem
+            - name: ES_TLS_KEY
+              value: /es-tls/client-key.pem
+              {{- else if .Values.elasticsearch.client.tls.insecureSkipVerify }}
+            - name: ES_TLS_SKIP_HOST_VERIFY
+              value: {{ .Values.elasticsearch.client.tls.insecureSkipVerify | quote }}
+              {{- end }}
+            {{- end }}
+            {{- with .Values.elasticsearch.rollover.initHook.extraEnv }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.elasticsearch.rollover.resources | nindent 12 }}
+          securityContext:
+            {{- include "elasticsearch.rolloverjob.containerSecurityContext" . }}
+          volumeMounts:
+          {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
+            - name: {{ .Values.jaeger.serviceName }}-es-pre-hook-tls-assets
+              mountPath: "/es-tls/ca-cert.pem"
+              subPath: "ca-cert.pem"
+              readOnly: true
+            - name: {{ .Values.jaeger.serviceName }}-es-pre-hook-tls-assets
+              mountPath: "/es-tls/client-cert.pem"
+              subPath: "client-cert.pem"
+              readOnly: true
+            - name: {{ .Values.jaeger.serviceName }}-es-pre-hook-tls-assets
+              mountPath: "/es-tls/client-key.pem"
+              subPath: "client-key.pem"
+              readOnly: true
+          {{- end }}
+          {{- range .Values.elasticsearch.rollover.extraConfigmapMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              subPath: {{ .subPath }}
+              readOnly: {{ .readOnly }}
+          {{- end }}
+          {{- range .Values.elasticsearch.rollover.extraSecretMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              subPath: {{ .subPath }}
+              readOnly: {{ .readOnly }}
+          {{- end }}
+      volumes:
+      {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
+        - name: {{ .Values.jaeger.serviceName }}-es-pre-hook-tls-assets
+          secret:
+            secretName: {{ template "elasticsearch.tls.secretName" (merge (dict "prehook" true) .) }}
+      {{- end }}
+      {{- range .Values.elasticsearch.rollover.extraConfigmapMounts }}
+        - name: {{ .name }}
+          configMap:
+            name: {{ .configMap }}
+      {{- end }}
+      {{- range .Values.elasticsearch.rollover.extraSecretMounts }}
+        - name: {{ .name }}
+          secret:
+            secretName: {{ .secretName }}
+      {{- end }}
+{{- end }}

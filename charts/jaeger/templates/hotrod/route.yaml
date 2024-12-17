@@ -1,0 +1,29 @@
+{{- if and .Values.hotrod.install .Values.hotrod.route.install}}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Values.jaeger.serviceName }}-hotrod
+  labels:
+    name: {{ .Values.jaeger.serviceName }}-hotrod
+    app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-hotrod
+    app.kubernetes.io/instance: {{ cat .Values.jaeger.serviceName "-hotrod-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: hotrod
+    {{- include "jaeger.commonLabels" . | nindent 4 }}
+    {{- if .Values.hotrod.labels }}
+      {{- toYaml .Values.hotrod.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.hotrod.annotations }}
+  annotations:
+    {{- toYaml .Values.hotrod.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  host: {{ include "hotrod.route" . }}
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: {{ .Values.jaeger.serviceName }}-hotrod
+    weight: 100
+status:
+  ingress: []
+{{- end }}
