@@ -1,0 +1,32 @@
+{{- if .Values.hotrod.install }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.jaeger.serviceName }}-hotrod
+  labels:
+    name: {{ .Values.jaeger.serviceName }}-hotrod
+    app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-hotrod
+    app.kubernetes.io/instance: {{ cat .Values.jaeger.serviceName "-hotrod-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: hotrod
+    {{- include "jaeger.commonLabels" . | nindent 4 }}
+    {{- if .Values.hotrod.labels }}
+      {{- toYaml .Values.hotrod.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.hotrod.annotations }}
+  annotations:
+    {{- toYaml .Values.hotrod.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.hotrod.service.port }}
+      protocol: TCP
+      targetPort: http
+  selector:
+    app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-hotrod
+    app.kubernetes.io/component: hotrod
+    {{- include "jaeger.commonLabels" . | nindent 4 }}
+    {{- if .Values.hotrod.labels }}
+      {{- toYaml .Values.hotrod.labels | nindent 4 }}
+    {{- end }}
+{{- end }}

@@ -1,0 +1,45 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+jaeger:
+  storage:
+    type: cassandra
+
+cassandraSchemaJob:
+  host: cassandra.cassandra.svc
+  keyspace: jaeger
+  password: admin
+  username: admin
+  datacenter: dc1
+
+  # This parameter responsible for with either with SimpleStrategy (without replication)
+  # or with NetworkReplicationStrategy (with replication):
+  # * prod - will use NetworkReplicationStrategy
+  # * test - will use SimpleStrategy
+  mode: prod
+
+collector:
+  install: true
+
+query:
+  install: true
+
+proxy:
+  install: true
+
+  # Enable OAuth2
+  type: oauth2
+  oauth2:
+    tokenEndpoint: https://example-url.com/token
+    authorizationEndpoint: https://example-url.com/auth
+    clientId: envoy
+    clientToken: envoy
+    idpAddress: example-url.com
+    idpPort: 80
+  resources:
+    limits:
+      cpu: 100m
+      memory: 200Mi
+    requests:
+      cpu: 50m
+      memory: 100Mi

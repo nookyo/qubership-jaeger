@@ -1,0 +1,46 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+jaeger:
+  storage:
+    type: elasticsearch
+
+elasticsearch:
+  client:
+    username: admin
+    password: admin
+    scheme: https
+    url: opensearch.opensearch.svc:9200
+    tls:
+      enabled: true
+      ca: |-
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
+      cert: |-
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
+      key: |-
+        -----BEGIN PRIVATE KEY-----
+        ...
+        -----END PRIVATE KEY-----
+  rollover:
+    install: true
+    schedule: "*/10 * * * *"
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 256m
+        memory: 128Mi
+
+collector:
+  install: true
+
+query:
+  install: true
+  ingress:
+    install: true
+    host: query.<cloud_dns_name>

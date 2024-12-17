@@ -1,0 +1,84 @@
+{{- if .Values.hotrod.install }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.jaeger.serviceName }}-hotrod
+  labels:
+    name: {{ .Values.jaeger.serviceName }}-hotrod
+    app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-hotrod
+    app.kubernetes.io/instance: {{ cat .Values.jaeger.serviceName "-hotrod-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: hotrod
+    {{- include "jaeger.commonLabels" . | nindent 4 }}
+    {{- if .Values.hotrod.labels }}
+      {{- toYaml .Values.hotrod.labels | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ default 1 .Values.hotrod.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-hotrod
+      app.kubernetes.io/component: hotrod
+  template:
+    metadata:
+      labels:
+        name: {{ .Values.jaeger.serviceName }}-hotrod
+        app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-hotrod
+        app.kubernetes.io/instance: {{ cat .Values.jaeger.serviceName "-hotrod-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+        app.kubernetes.io/component: hotrod
+        {{- include "jaeger.commonLabels" . | nindent 8 }}
+        app.kubernetes.io/managed-by: Helm
+        {{- if .Values.hotrod.labels }}
+          {{- toYaml .Values.hotrod.labels | nindent 8 }}
+        {{- end }}
+    spec:
+      securityContext:
+        {{- include "hotrod.securityContext" . }}
+      serviceAccountName: {{ .Values.jaeger.serviceName }}-hotrod
+      {{- with .Values.hotrod.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.hotrod.priorityClassName }}
+      priorityClassName: {{ .Values.hotrod.priorityClassName }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.hotrod.name }}
+          image: {{ template "hotrod.image" . }}
+          imagePullPolicy: {{ .Values.hotrod.imagePullPolicy }}
+          env:
+            {{- if .Values.hotrod.otelExporter.host }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://{{ .Values.hotrod.otelExporter.host }}:{{ .Values.hotrod.otelExporter.port }}"
+            {{- else }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://{{ .Values.jaeger.serviceName }}-collector:{{ .Values.hotrod.otelExporter.port }}"
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.hotrod.resources | nindent 12 }}
+          securityContext:
+            {{- include "hotrod.containerSecurityContext" . }}
+      {{- if .Values.hotrod.affinity }}
+      affinity:
+        {{- toYaml .Values.hotrod.affinity | nindent 8 }}
+      {{- end }}
+      {{- if .Values.hotrod.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.hotrod.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.hotrod.tolerations }}
+      tolerations:
+        {{- toYaml .Values.hotrod.tolerations | nindent 8 }}
+      {{- end }}
+{{- end }}
