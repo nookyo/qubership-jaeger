@@ -1,0 +1,14 @@
+{{- if .Values.integrationTests.install -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tests-config
+  labels:
+    app: jaeger-tests
+data:
+  {{- if include "jaeger.monitoredImages" . }}
+  images: {{ include "jaeger.monitoredImages" . }}
+  {{ else }}
+  images: ""
+  {{ end }}
+{{ end }}

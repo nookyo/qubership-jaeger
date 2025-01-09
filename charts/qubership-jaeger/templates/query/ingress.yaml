@@ -1,0 +1,44 @@
+{{- if and .Values.query.install .Values.query.ingress.install }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.jaeger.serviceName }}-query
+  labels:
+    name: {{ .Values.jaeger.serviceName }}-query
+    app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-query
+    app.kubernetes.io/instance: {{ cat .Values.jaeger.serviceName "-query-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: query
+    {{- include "jaeger.commonLabels" . | nindent 4 }}
+    {{- if .Values.query.labels }}
+      {{- toYaml .Values.query.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.query.annotations }}
+  annotations:
+    {{- toYaml .Values.query.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.query.ingress.className }}
+  ingressClassName: {{ .Values.query.ingress.className }}
+  {{- end }}
+  rules:
+    - host: {{ include "query.ingress" . }}
+      http:
+        paths:
+          - path: /
+            {{- if semverCompare "<1.21-0" .Capabilities.KubeVersion.GitVersion }}
+            backend:
+              serviceName: {{ .Values.jaeger.serviceName }}-query
+              servicePort: "http-query"
+            {{- else }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.jaeger.serviceName }}-query
+                port:
+                  name: "http-query"
+            {{- end }}
+  {{- if .Values.query.ingress.tls }}
+  tls:
+    {{- toYaml .Values.query.ingress.tls | nindent 4 }}
+  {{- end }}
+{{- end }}

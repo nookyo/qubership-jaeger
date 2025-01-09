@@ -1,0 +1,50 @@
+{{- if not .Values.collector.tlsConfig.existingSecret }}
+{{- if and .Values.collector.tlsConfig.generateCerts.enabled (or .Values.collector.tlsConfig.otelHttp.enabled 
+            .Values.collector.tlsConfig.otelgRPC.enabled 
+            .Values.collector.tlsConfig.jaegerHttp.enabled
+            .Values.collector.tlsConfig.jaegergRPC.enabled
+            .Values.collector.tlsConfig.zipkin.enabled) }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: jaeger-collector-tls-certificate
+  labels:
+    name: jaeger-collector-tls-certificate
+    app.kubernetes.io/name: jaeger-collector-tls-certificate
+    app.kubernetes.io/instance: {{ cat "jaeger-collector-tls-certificate-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: collector
+    {{- if .Values.collector.labels }}
+      {{- toYaml .Values.collector.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.collector.annotations }}
+  annotations:
+    {{- toYaml .Values.collector.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ default "jaeger-collector-tls-secret" .Values.collector.tlsConfig.newSecretName }}
+  duration: {{ default 365 .Values.collector.tlsConfig.generateCerts.duration | mul 24 }}h
+  renewBefore: {{ default 15 .Values.collector.tlsConfig.generateCerts.renewBefore | mul 24 }}h
+  commonName: jaeger-collector-crt
+  isCA: false
+  privateKey:
+    rotationPolicy: Always
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  dnsNames:
+    - localhost
+    - {{ .Values.jaeger.serviceName }}-collector.{{ .Release.Namespace }}.svc
+    - {{ .Values.jaeger.serviceName }}-collector
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+{{- if .Values.collector.tlsConfig.generateCerts.clusterIssuerName }}
+    name: {{ .Values.collector.tlsConfig.generateCerts.clusterIssuerName }}
+    kind: ClusterIssuer
+{{- else }}
+    name: jaeger-collector-tls-issuer
+    kind: Issuer
+{{- end }}
+    group: cert-manager.io
+{{- end }}
+{{- end }}
