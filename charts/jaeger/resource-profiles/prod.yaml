@@ -1,2 +1,0 @@
-# Empty profile, just because the DP.Builder require dev.yaml and prod.yaml files during the build
-type: prod

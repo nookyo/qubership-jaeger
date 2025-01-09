@@ -1,0 +1,86 @@
+{{- if .Values.statusProvisioner.install }}
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: integration-tests-status-provisioner
+  labels:
+    name: integration-tests-status-provisioner
+    app.kubernetes.io/name: integration-tests-status-provisioner
+    app.kubernetes.io/instance: {{ cat "integration-tests-status-provisioner-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: jaeger-integration-tests
+    app.kubernetes.io/part-of: jaeger
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+spec:
+  {{- if or (gt .Capabilities.KubeVersion.Major "1") (ge .Capabilities.KubeVersion.Minor "12") }}
+  ttlSecondsAfterFinished: {{ .Values.statusProvisioner.lifetimeAfterCompletion | default 300 }}
+  {{- end }}
+  completions: 1
+  parallelism: 1
+  backoffLimit: 4
+  template:
+    metadata:
+      labels:
+        name: integration-tests-status-provisioner
+        app.kubernetes.io/name: integration-tests-status-provisioner
+        app.kubernetes.io/instance: {{ cat "integration-tests-status-provisioner-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+        app.kubernetes.io/component: jaeger-integration-tests
+        app.kubernetes.io/part-of: jaeger
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      securityContext:
+        {{- include "statusProvisioner.securityContext" . }}
+      restartPolicy: Never
+      serviceAccountName: integration-tests-status-provisioner
+      {{- if .Values.statusProvisioner.priorityClassName }}
+      priorityClassName: {{ .Values.statusProvisioner.priorityClassName }}
+      {{- end }}
+      containers:
+      - name: integration-tests-status-provisioner
+        image: {{ template "deployment-status-provisioner.image" . }}
+        imagePullPolicy: Always
+        resources: {{ toYaml .Values.statusProvisioner.resources | nindent 10 }}
+        env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: TEMP
+            value: /opt/robot/target
+          - name: RESOURCE_TO_SET_STATUS
+            value: "batch v1 jobs integration-tests-status-provisioner"
+          - name: CONDITION_REASON
+            value: "IntegrationTestsExecutionStatus"
+          - name: MONITORED_RESOURCES
+            value: '{{ include "jaeger.monitoredResources" . | trim | trimSuffix "," }}'
+          - name: STATUS_WRITING_ENABLED
+            value: {{ .Values.integrationTests.statusWriting.enabled | quote }}
+          {{- if and .Values.integrationTests.install .Values.integrationTests.statusWriting.enabled }}
+          - name: INTEGRATION_TESTS_RESOURCE 
+            value: {{ printf "apps v1 deployments %s" .Values.integrationTests.service.name }}
+          - name: ONLY_INTEGRATION_TESTS
+            value: {{ .Values.integrationTests.statusWriting.onlyIntegrationTests | quote }}
+          - name: IS_SHORT_STATUS_MESSAGE
+            value: {{ .Values.integrationTests.statusWriting.isShortStatusMessage | quote }}
+          - name: STATUS_CUSTOM_RESOURCE_PATH
+            value: {{ toYaml .Values.integrationTests.statusWriting.customResourcePath }}
+          - name: INTEGRATION_TESTS_CONDITION_REASON
+            value: "IntegrationTestsExecutionStatus"
+          - name: INTEGRATION_TESTS_SUCCESSFUL_CONDITION_TYPE
+            value: "Successful"
+          {{- end }}
+        volumeMounts:
+          - name: robot-storage
+            mountPath: /opt/robot/target
+        securityContext:
+          {{- include "statusProvisioner.containerSecurityContext" . }}
+      volumes:
+        - name: robot-storage
+          emptyDir: {}
+      nodeSelector: {}
+      affinity: {}
+{{- end }}
