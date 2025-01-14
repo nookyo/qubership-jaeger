@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - '**'
+  pull_request:
+    branches:
+      - '**'
+
 env:
   TAG_NAME: ${{ github.event.release.tag_name || (github.ref == 'refs/heads/main' && 'main' || ( inputs.postfix != '' && format('{0}-{1}', github.ref, inputs.postfix) || 'none' )) }}
 
@@ -35,8 +39,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${GITHUB_ACTOR}
-          password: ${{secrets.GITHUB_TOKEN}}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -44,6 +48,7 @@ jobs:
           context: ${{ matrix.component.context }}
           file: ${{ matrix.component.file }}
           platforms: linux/amd64,linux/arm64
-          push: true
+          # See https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions#fetching-metadata-about-a-pull-request
+          push: ${{ github.event_name != 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]' }}
           tags: ghcr.io/netcracker/${{ matrix.component.name }}:${{ env.TAG_NAME }}
           provenance: false
