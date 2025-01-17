@@ -1798,7 +1798,7 @@ Examples:
 ```yaml
 statusProvisioner:
   install: true
-  image: ghcr.io/netcracker/deployment-status-provisioner:main
+  image: ghcr.io/netcracker/qubership-deployment-status-provisioner:main
   lifetimeAfterCompletion: 300
   podReadinessTimeout: 300
   integrationTestsTimeout: 300
