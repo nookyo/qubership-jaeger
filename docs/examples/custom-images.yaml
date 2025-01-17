@@ -23,4 +23,4 @@ elasticsearch:
 integrationTests:
   image: ghcr.io/netcracker/jaeger-integration-tests:main
 statusProvisioner:
-  image: ghcr.io/netcracker/deployment-status-provisioner:main
+  image: ghcr.io/netcracker/qubership-deployment-status-provisioner:main

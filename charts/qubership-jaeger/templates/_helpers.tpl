@@ -221,7 +221,7 @@ Find a Deployment Status Provisioner image in various places.
   {{- if .Values.statusProvisioner.image -}}
     {{- printf "%s" .Values.statusProvisioner.image -}}
   {{- else -}}
-    {{- print "ghcr.io/netcracker/deployment-status-provisioner:main" -}}
+    {{- print "ghcr.io/netcracker/qubership-deployment-status-provisioner:main" -}}
   {{- end -}}
 {{- end -}}
 
