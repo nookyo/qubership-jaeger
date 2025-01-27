@@ -1164,6 +1164,7 @@ Prepare args for readiness-probe container.
                 - "-caPath=/es-tls/ca-cert.pem"
                 - "-crtPath=/es-tls/client-cert.pem"
                 - "-keyPath=/es-tls/client-key.pem"
+                {{- end }}
             {{- end }}
         {{- end }}
     {{- end }}
