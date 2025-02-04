@@ -1,4 +1,4 @@
-{{- if .Values.collector.install }}
+{{- if and .Values.collector.install }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

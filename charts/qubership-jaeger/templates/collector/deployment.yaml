@@ -130,149 +130,10 @@ spec:
           image: {{ template "collector.image" . }}
           imagePullPolicy: {{ .Values.collector.imagePullPolicy }}
           args:
-            {{- if .Values.collector.cmdlineParams }}
-              {{- toYaml .Values.collector.cmdlineParams | nindent 12 }}
-            {{- end }}
+            {{- template "collector.args" . }}
           env:
-            {{- if $otelhttpTlsConfigEnabled }}
-            - name: COLLECTOR_OTLP_HTTP_TLS_ENABLED
-              value: {{ $otelhttpTlsConfigEnabled | quote }}
-            - name: COLLECTOR_OTLP_HTTP_TLS_CERT
-              value: /collector-tls/tls.crt
-            - name: COLLECTOR_OTLP_HTTP_TLS_CLIENT_CA
-              value: /collector-tls/ca.crt
-            - name: COLLECTOR_OTLP_HTTP_TLS_KEY
-              value: /collector-tls/tls.key
-            {{- if .Values.collector.tlsConfig.otelHttp.cipherSuites }}
-            - name: COLLECTOR_OTLP_HTTP_TLS_CIPHER_SUITES
-              value: {{ .Values.collector.tlsConfig.otelHttp.cipherSuites }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.otelHttp.maxVersion }}
-            - name: COLLECTOR_OTLP_HTTP_TLS_MAX_VERSION
-              value: {{ .Values.collector.tlsConfig.otelHttp.maxVersion | quote }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.otelHttp.minVersion }}
-            - name: COLLECTOR_OTLP_HTTP_TLS_MIN_VERSION
-              value: {{ .Values.collector.tlsConfig.otelHttp.minVersion | quote }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.otelHttp.certificateReloadInterval }}
-            - name: COLLECTOR_OTLP_HTTP_TLS_RELOAD_INTERVAL
-              value: {{ default "0s" .Values.collector.tlsConfig.otelHttp.certificateReloadInterval }}
-            {{- end }}
-            {{- end }}
-            {{- if $otelgrpcTlsConfigEnabled }}
-            - name: COLLECTOR_OTLP_GRPC_TLS_ENABLED
-              value: {{ $otelgrpcTlsConfigEnabled | quote }}
-            - name: COLLECTOR_OTLP_GRPC_TLS_CERT
-              value: /collector-tls/tls.crt
-            - name: COLLECTOR_OTLP_GRPC_TLS_CLIENT_CA
-              value: /collector-tls/ca.crt
-            - name: COLLECTOR_OTLP_GRPC_TLS_KEY
-              value: /collector-tls/tls.key
-            {{- if .Values.collector.tlsConfig.otelgRPC.cipherSuites }}
-            - name: COLLECTOR_OTLP_GRPC_TLS_CIPHER_SUITES
-              value: {{ .Values.collector.tlsConfig.otelgRPC.cipherSuites }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.otelgRPC.maxVersion }}
-            - name: COLLECTOR_OTLP_GRPC_TLS_MAX_VERSION
-              value: {{ .Values.collector.tlsConfig.otelgRPC.maxVersion | quote }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.otelgRPC.minVersion }}
-            - name: COLLECTOR_OTLP_GRPC_TLS_MIN_VERSION
-              value: {{ .Values.collector.tlsConfig.otelgRPC.minVersion | quote }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.otelgRPC.certificateReloadInterval }}
-            - name: COLLECTOR_OTLP_GRPC_TLS_RELOAD_INTERVAL
-              value: {{ default "0s" .Values.collector.tlsConfig.otelgRPC.certificateReloadInterval }}
-            {{- end }}
-            {{- end }}
-            {{- if $jaegerhttpTlsConfigEnabled }}
-            - name: COLLECTOR_HTTP_TLS_ENABLED
-              value: {{ $jaegerhttpTlsConfigEnabled | quote }}
-            - name: COLLECTOR_HTTP_TLS_CERT
-              value: /collector-tls/tls.crt
-            - name: COLLECTOR_HTTP_TLS_CLIENT_CA
-              value: /collector-tls/ca.crt
-            - name: COLLECTOR_HTTP_TLS_KEY
-              value: /collector-tls/tls.key
-            {{- if .Values.collector.tlsConfig.jaegerHttp.cipherSuites }}
-            - name: COLLECTOR_HTTP_TLS_CIPHER_SUITES
-              value: {{ .Values.collector.tlsConfig.jaegerHttp.cipherSuites }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.jaegerHttp.maxVersion }}
-            - name: COLLECTOR_HTTP_TLS_MAX_VERSION
-              value: {{ .Values.collector.tlsConfig.jaegerHttp.maxVersion | quote }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.jaegerHttp.minVersion }}
-            - name: COLLECTOR_HTTP_TLS_MIN_VERSION
-              value: {{ .Values.collector.tlsConfig.jaegerHttp.minVersion | quote }}
-            {{- end }}
-            {{- end }}
-            {{- if $jaegergrpcTlsConfigEnabled }}
-            - name: COLLECTOR_GRPC_TLS_ENABLED
-              value: {{ $jaegergrpcTlsConfigEnabled | quote }}
-            - name: COLLECTOR_GRPC_TLS_CERT
-              value: /collector-tls/tls.crt
-            - name: COLLECTOR_GRPC_TLS_CLIENT_CA
-              value: /collector-tls/ca.crt
-            - name: COLLECTOR_GRPC_TLS_KEY
-              value: /collector-tls/tls.key
-            {{- if .Values.collector.tlsConfig.jaegergRPC.cipherSuites }}
-            - name: COLLECTOR_GRPC_TLS_CIPHER_SUITES
-              value: {{ .Values.collector.tlsConfig.jaegergRPC.cipherSuites }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.jaegergRPC.maxVersion }}
-            - name: COLLECTOR_GRPC_TLS_MAX_VERSION
-              value: {{ .Values.collector.tlsConfig.jaegergRPC.maxVersion | quote }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.jaegergRPC.minVersion }}
-            - name: COLLECTOR_GRPC_TLS_MIN_VERSION
-              value: {{ .Values.collector.tlsConfig.jaegergRPC.minVersion | quote }}
-            {{- end }}
-            {{- end }}
-            {{- if $zipkinTlsConfigEnabled }}
-            - name: COLLECTOR_ZIPKIN_TLS_ENABLED
-              value: {{ $zipkinTlsConfigEnabled | quote }}
-            - name: COLLECTOR_ZIPKIN_TLS_CERT
-              value: /collector-tls/tls.crt
-            - name: COLLECTOR_ZIPKIN_TLS_CLIENT_CA
-              value: /collector-tls/ca.crt
-            - name: COLLECTOR_ZIPKIN_TLS_KEY
-              value: /collector-tls/tls.key
-            {{- if .Values.collector.tlsConfig.zipkin.cipherSuites }}
-            - name: COLLECTOR_ZIPKIN_TLS_CIPHER_SUITES
-              value: {{ .Values.collector.tlsConfig.zipkin.cipherSuites }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.zipkin.maxVersion }}
-            - name: COLLECTOR_ZIPKIN_TLS_MAX_VERSION
-              value: {{ .Values.collector.tlsConfig.zipkin.maxVersion | quote }}
-            {{- end }}
-            {{- if .Values.collector.tlsConfig.zipkin.minVersion }}
-            - name: COLLECTOR_ZIPKIN_TLS_MIN_VERSION
-              value: {{ .Values.collector.tlsConfig.zipkin.minVersion | quote }}
-            {{- end }}
-            {{- end }}
-            - name: COLLECTOR_OTLP_ENABLED
-              value: "true"
-            {{- if .Values.collector.zipkinPort }}
-            - name: COLLECTOR_ZIPKIN_HOST_PORT
-              value: {{ .Values.collector.zipkinPort | quote }}
-            {{- end }}
-            {{- if .Values.collector.samplingConfig }}
-            - name: SAMPLING_STRATEGIES_FILE
-              value: /etc/jaeger/sampling/sampling.json
-            {{- end }}
-            - name: SPAN_STORAGE_TYPE
-              value: {{ .Values.jaeger.storage.type }}
             {{- /* Section with Cassandra enviroment variables */}}
-            {{- if .Values.collector.extraEnv }}
-              {{- toYaml .Values.collector.extraEnv | nindent 12 }}
-            {{- end }}
             {{- if eq .Values.jaeger.storage.type "cassandra" }}
-            - name: CASSANDRA_SERVERS
-              value: {{ include "cassandraSchemaJob.host" . | quote }}
-            - name: CASSANDRA_PORT
-              value: {{ include "cassandraSchemaJob.port" . | quote }}
             - name: CASSANDRA_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -283,39 +144,8 @@ spec:
                 secretKeyRef:
                   name: {{ template "cassandraSchemaJob.secretName" . }}
                   key: password
-            - name: CASSANDRA_BASIC_ALLOWED_AUTHENTICATORS
-              value: {{ template "cassandraSchemaJob.allowedAuthenticators" . }}
-              {{- if .Values.cassandraSchemaJob.tls.enabled }}
-            - name: CASSANDRA_TLS_ENABLED
-              value: "true"
-                {{- if .Values.cassandraSchemaJob.tls.commonName }}
-            - name: CASSANDRA_TLS_SERVER_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-                  key: commonName
-                {{- end }}
-            - name: CASSANDRA_TLS_KEY
-              value: "/cassandra-tls/client-key.pem"
-            - name: CASSANDRA_TLS_CERT
-              value: "/cassandra-tls/client-cert.pem"
-            - name: CASSANDRA_TLS_CA
-              value: "/cassandra-tls/ca-cert.pem"
-              {{- end }}
-              {{- if .Values.cassandraSchemaJob.keyspace }}
-            - name: CASSANDRA_KEYSPACE
-              value: {{ .Values.cassandraSchemaJob.keyspace }}
-              {{- end }}
-            - name: CASSANDRA_LOCAL_DC
-              value: {{ include "cassandraSchemaJob.datacenter" . }}            
-              {{- /* Section with Cassandra extra enviroment variables */}}
-              {{- if .Values.cassandraSchemaJob.extraEnv }}
-                {{- toYaml .Values.cassandraSchemaJob.extraEnv | nindent 12 }}
-              {{- end }}
             {{- /* Section with ElasticSearch/OpenSearch enviroment variables */}}
             {{- else if eq .Values.jaeger.storage.type "elasticsearch" }}
-            - name: ES_SERVER_URLS
-              value: {{ include "elasticsearch.url" . }}
             - name: ES_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -326,29 +156,6 @@ spec:
                 secretKeyRef:
                   name: {{ if .Values.elasticsearch.existingSecret }}{{ .Values.elasticsearch.existingSecret }}{{- else }}jaeger-elasticsearch{{- end }}
                   key: password
-              {{- if .Values.elasticsearch.indexPrefix }}
-            - name: ES_INDEX_PREFIX
-              value: {{ .Values.elasticsearch.indexPrefix }}
-              {{- end }}
-              {{- if .Values.elasticsearch.client.tls.enabled }}
-            - name: ES_TLS_ENABLED
-              value: {{ .Values.elasticsearch.client.tls.enabled | quote }}
-                {{- if or .Values.elasticsearch.client.tls.existingSecret (or .Values.elasticsearch.client.tls.ca .Values.elasticsearch.client.tls.cert .Values.elasticsearch.client.tls.key) }}
-            - name: ES_TLS_CA
-              value: /es-tls/ca-cert.pem
-            - name: ES_TLS_CERT
-              value: /es-tls/client-cert.pem
-            - name: ES_TLS_KEY
-              value: /es-tls/client-key.pem
-                {{- else if .Values.elasticsearch.client.tls.insecureSkipVerify }}
-            - name: ES_TLS_SKIP_HOST_VERIFY
-              value: {{ .Values.elasticsearch.client.tls.insecureSkipVerify | quote }}
-                {{- end }}
-              {{- end }}
-              {{- /* Section with ElasticSearch/OpenSearch extra enviroment variables */}}
-              {{- if .Values.elasticsearch.extraEnv }}
-                {{- toYaml .Values.elasticsearch.extraEnv | nindent 12 }}
-              {{- end }}
             {{- end }}
           {{- if .Values.readinessProbe.install }}
           readinessProbe:
@@ -365,8 +172,8 @@ spec:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /
-              port: admin-http
+              path: /status
+              port: healtcheck
               scheme: HTTP
             initialDelaySeconds: 1
             periodSeconds: 10
@@ -376,8 +183,8 @@ spec:
           livenessProbe:
             failureThreshold: 5
             httpGet:
-              path: /
-              port: admin-http
+              path: /status
+              port: healthcheck
               scheme: HTTP
             initialDelaySeconds: 5
             periodSeconds: 15
@@ -407,6 +214,12 @@ spec:
             - containerPort: 4318
               name: otlp-http
               protocol: TCP
+            - containerPort: 13133
+              name: healthcheck
+              protocol: TCP
+            - containerPort: 5778
+              name: sampling
+              protocol: TCP
           resources:
             {{- toYaml .Values.collector.resources | nindent 12 }}
           securityContext:
@@ -416,6 +229,9 @@ spec:
           volumeMounts:
             - mountPath: /etc/jaeger/sampling
               name: {{ .Values.jaeger.serviceName }}-sampling-configuration-volume
+              readOnly: true
+            - mountPath: /conf
+              name: jaeger-collector-configuration-volume
               readOnly: true
             {{- if .Values.cassandraSchemaJob.tls.enabled }}
             - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
@@ -442,6 +258,20 @@ spec:
               readOnly: true
             - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
               mountPath: "/es-tls/client-key.pem"
+              subPath: "client-key.pem"
+              readOnly: true
+            {{- end }}
+            {{- if and .Values.remotegRPC.tls.enabled (not .Values.remotegRPC.tls.insecureSkipVerify) }}
+            - name: {{ .Values.jaeger.serviceName }}-remotegrpc-tls-assets
+              mountPath: "/grpc-tls/ca-cert.pem"
+              subPath: "ca-cert.pem"
+              readOnly: true
+            - name: {{ .Values.jaeger.serviceName }}-remotegrpc-tls-assets
+              mountPath: "/grpc-tls/client-cert.pem"
+              subPath: "client-cert.pem"
+              readOnly: true
+            - name: {{ .Values.jaeger.serviceName }}-remotegrpc-tls-assets
+              mountPath: "/grpc-tls/client-key.pem"
               subPath: "client-key.pem"
               readOnly: true
             {{- end }}
@@ -490,6 +320,13 @@ spec:
             items:
               - key: sampling
                 path: sampling.json
+        - name: {{ .Values.jaeger.serviceName }}-collector-configuration-volume
+          configMap:
+            name: {{ .Values.jaeger.serviceName }}-collector-configuration
+            items:
+              - key: config.yaml
+                path: config.yaml
+            defaultMode: 420            
         {{- if .Values.cassandraSchemaJob.tls.enabled }}
         - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
           secret:
@@ -499,6 +336,11 @@ spec:
         - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
           secret:
             secretName: {{ template "elasticsearch.tls.secretName" . }}
+        {{- end }}
+        {{- if and .Values.remotegRPC.tls.enabled (not .Values.remotegRPC.tls.insecureSkipVerify) }}
+        - name: {{ .Values.jaeger.serviceName }}-remotegrpc-tls-assets
+          secret:
+            secretName: {{ if .Values.remotegRPC.existingSecret }}{{ .Values.remotegRPC.existingSecret }}{{ else }}{{  default "jaeger-remotegrpc-tls-assets" .Values.collector.tlsConfig.newSecretName }}{{- end -}}
         {{- end }}
         {{- if .Values.collector.tlsConfig.existingSecret }}
         - name: {{ .Values.collector.tlsConfig.existingSecret }}

@@ -106,7 +106,7 @@ Image can be found from:
   {{- if .Values.collector.image -}}
     {{- printf "%s" .Values.collector.image -}}
   {{- else -}}
-    {{- print "jaegertracing/jaeger-collector:1.62.0" -}}
+    {{- print "jaegertracing/jaeger:2.2.0" -}}
   {{- end -}}
 {{- end -}}
 
@@ -119,7 +119,7 @@ Image can be found from:
   {{- if .Values.query.image -}}
     {{- printf "%s" .Values.query.image -}}
   {{- else -}}
-    {{- print "jaegertracing/jaeger-query:1.62.0" -}}
+    {{- print "jaegertracing/jaeger:2.2.0" -}}
   {{- end -}}
 {{- end -}}
 
@@ -1144,9 +1144,13 @@ Prepare args for readiness-probe container.
             - "-port={{ include "cassandraSchemaJob.port" . }}"
             {{- if .Values.cassandraSchemaJob.tls.enabled }}
             - "-tlsEnabled=true"
+            {{- if .Values.cassandraSchemaJob.tls.insecureSkipVerify }}
+            - "-insecureSkipVerify=true"
+            {{- else }}            
             - "-caPath=/cassandra-tls/ca-cert.pem"
             - "-crtPath=/cassandra-tls/client-cert.pem"
             - "-keyPath=/cassandra-tls/client-key.pem"
+            {{- end }}
             {{- end }}
         {{- else }}
             - "-storage=opensearch"
@@ -1154,14 +1158,26 @@ Prepare args for readiness-probe container.
             - "-authSecretName=jaeger-elasticsearch"
             {{- if .Values.elasticsearch.client.tls.enabled }}
             - "-tlsEnabled=true"
+            {{- if .Values.elasticsearch.client.tls.insecureSkipVerify }}
+            - "-insecureSkipVerify=true"
+            {{- else }}
             - "-caPath=/es-tls/ca-cert.pem"
             - "-crtPath=/es-tls/client-cert.pem"
             - "-keyPath=/es-tls/client-key.pem"
             {{- end }}
+            {{- end }}
         {{- end }}
     {{- end }}
 {{- end -}}
-
+{{- define "collector.args" -}}
+    {{- if .Values.collector.args }}
+        {{- range .Values.collector.args }}
+            - {{ . | quote }}
+        {{- end }}
+    {{- else }}
+            - "--config=/conf/config.yaml"
+    {{- end }}
+{{- end -}}
 {{- define "jaeger.monitoredImages" -}}
     {{- if .Values.agent.install -}}
       {{- printf "daemonset %s-agent %s %s, " .Values.jaeger.serviceName .Values.agent.name "jaegertracing/jaeger-agent:1.62.0" -}}

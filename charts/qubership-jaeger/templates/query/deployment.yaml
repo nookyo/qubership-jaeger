@@ -175,30 +175,13 @@ spec:
           image: {{ template "query.image" . }}
           imagePullPolicy: {{ .Values.query.imagePullPolicy }}
           args:
-            - '--query.ui-config=/etc/config/query-ui-config.json'
+            - '--config=/conf/config.yaml'
             {{- if .Values.query.cmdlineParams }}
               {{- toYaml .Values.query.cmdlineParams | nindent 12 }}
             {{- end }}
           env:
-            {{- if .Values.query.config }}
-            - name: QUERY_UI_CONFIG
-              value: /etc/conf/query-ui-config.json
-            {{- end }}
-            - name: SPAN_STORAGE_TYPE
-              value: {{ .Values.jaeger.storage.type }}
-            - name: JAEGER_SERVICE_NAME
-              value: {{ .Values.jaeger.serviceName }}.{{ .Release.Namespace }}
-            - name: JAEGER_PROPAGATION
-              value: 'jaeger,b3'
-            {{- if .Values.query.extraEnv }}
-              {{- toYaml .Values.query.extraEnv | nindent 12 }}
-            {{- end }}
           {{- /* Section with Cassandra enviroment variables */}}
           {{- if eq .Values.jaeger.storage.type "cassandra" }}
-            - name: CASSANDRA_SERVERS
-              value: {{ include "cassandraSchemaJob.host" . | quote }}
-            - name: CASSANDRA_PORT
-              value: {{ include "cassandraSchemaJob.port" . | quote }}
             - name: CASSANDRA_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -209,39 +192,8 @@ spec:
                 secretKeyRef:
                   name: {{ template "cassandraSchemaJob.secretName" . }}
                   key: password
-            - name: CASSANDRA_BASIC_ALLOWED_AUTHENTICATORS
-              value: {{ template "cassandraSchemaJob.allowedAuthenticators" . }}
-            {{- if .Values.cassandraSchemaJob.keyspace }}
-            - name: CASSANDRA_KEYSPACE
-              value: {{ .Values.cassandraSchemaJob.keyspace }}
-            {{- end }}
-            - name: CASSANDRA_LOCAL_DC
-              value: {{ include "cassandraSchemaJob.datacenter" . }}
-            {{- if .Values.cassandraSchemaJob.tls.enabled }}
-            - name: CASSANDRA_TLS_ENABLED
-              value: "true"
-              {{- if .Values.cassandraSchemaJob.tls.commonName }}
-            - name: CASSANDRA_TLS_SERVER_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-                  key: commonName
-              {{- end }}
-            - name: CASSANDRA_TLS_KEY
-              value: "/cassandra-tls/client-key.pem"
-            - name: CASSANDRA_TLS_CERT
-              value: "/cassandra-tls/client-cert.pem"
-            - name: CASSANDRA_TLS_CA
-              value: "/cassandra-tls/ca-cert.pem"
-            {{- end }}
-            {{- /* Section with Cassandra extra enviroment variables */}}
-            {{- if .Values.cassandraSchemaJob.extraEnv }}
-              {{- toYaml .Values.cassandraSchemaJob.extraEnv | nindent 12 }}
-            {{- end }}
           {{- /* Section with ElasticSearch/OpenSearch enviroment variables */}}
           {{- else if eq .Values.jaeger.storage.type "elasticsearch" }}
-            - name: ES_SERVER_URLS
-              value: {{ include "elasticsearch.url" . }}
             - name: ES_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -252,39 +204,16 @@ spec:
                 secretKeyRef:
                   name: {{ if .Values.elasticsearch.existingSecret }}{{ .Values.elasticsearch.existingSecret }}{{- else }}jaeger-elasticsearch{{- end }}
                   key: password
-            {{- if .Values.elasticsearch.indexPrefix }}
-            - name: ES_INDEX_PREFIX
-              value: {{ .Values.elasticsearch.indexPrefix }}
-            {{- end }}
-            {{- if .Values.elasticsearch.client.tls.enabled }}
-            - name: ES_TLS_ENABLED
-              value: {{ .Values.elasticsearch.client.tls.enabled | quote }}
-              {{- if or .Values.elasticsearch.client.tls.existingSecret (or .Values.elasticsearch.client.tls.ca .Values.elasticsearch.client.tls.cert .Values.elasticsearch.client.tls.key) }}
-            - name: ES_TLS_CA
-              value: /es-tls/ca-cert.pem
-            - name: ES_TLS_CERT
-              value: /es-tls/client-cert.pem
-            - name: ES_TLS_KEY
-              value: /es-tls/client-key.pem
-              {{- else if .Values.elasticsearch.client.tls.insecureSkipVerify }}
-            - name: ES_TLS_SKIP_HOST_VERIFY
-              value: {{ .Values.elasticsearch.client.tls.insecureSkipVerify | quote }}
-              {{- end }}
-            {{- end }}
             {{- range $key, $value := .Values.elasticsearch.env }}
             - name: {{ $key | quote }}
               value: {{ $value | quote }}
-            {{- end }}
-            {{- /* Section with ElasticSearch/OpenSearch extra enviroment variables */}}
-            {{- if .Values.elasticsearch.extraEnv }}
-              {{ toYaml .Values.elasticsearch.extraEnv | nindent 12 }}
             {{- end }}
           {{- end }}
           livenessProbe:
             failureThreshold: 5
             httpGet:
-              path: /
-              port: admin-http
+              path: /status
+              port: healthcheck
               scheme: HTTP
             initialDelaySeconds: 15
             periodSeconds: 15
@@ -305,8 +234,8 @@ spec:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /
-              port: admin-http
+              path: /status
+              port: healtcheck
               scheme: HTTP
             initialDelaySeconds: 15
             periodSeconds: 10
@@ -314,11 +243,17 @@ spec:
             timeoutSeconds: 1
           {{- end }}
           ports:
+            - containerPort: 16685
+              name: query-grpc
+              protocol: TCP
             - containerPort: 16686
-              name: query
+              name: query-http
               protocol: TCP
             - containerPort: 16687
               name: admin-http
+              protocol: TCP
+            - containerPort: 13133
+              name: healthcheck
               protocol: TCP
           resources:
             {{- toYaml .Values.query.resources | nindent 12 }}
@@ -329,6 +264,9 @@ spec:
           volumeMounts:
             - mountPath: /etc/config
               name: {{ .Values.jaeger.serviceName }}-ui-configuration-volume
+              readOnly: true
+            - mountPath: /conf
+              name: {{ .Values.jaeger.serviceName }}-query-configuration-volume
               readOnly: true
             {{- if .Values.cassandraSchemaJob.tls.enabled }}
             - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
@@ -369,6 +307,13 @@ spec:
           configMap:
             name: {{ .Values.jaeger.serviceName }}-ui-configuration
             defaultMode: 420
+        - name: {{ .Values.jaeger.serviceName }}-query-configuration-volume
+          configMap:
+            name: {{ .Values.jaeger.serviceName }}-query-configuration
+            items:
+              - key: config.yaml
+                path: config.yaml
+            defaultMode: 420                    
         {{- if .Values.proxy.install }}
         - name: envoy-config
           secret:
