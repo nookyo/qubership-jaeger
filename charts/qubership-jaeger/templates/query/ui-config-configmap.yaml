@@ -1,4 +1,5 @@
 {{- if .Values.query.install }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:

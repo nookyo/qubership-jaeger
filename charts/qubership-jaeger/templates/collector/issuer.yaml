@@ -4,6 +4,7 @@
             .Values.collector.tlsConfig.jaegerHttp.enabled
             .Values.collector.tlsConfig.jaegergRPC.enabled
             .Values.collector.tlsConfig.zipkin.enabled) (not .Values.collector.tlsConfig.clusterIssuerName)}}
+---
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:

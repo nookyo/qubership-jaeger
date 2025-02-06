@@ -1,4 +1,5 @@
 {{- if .Values.statusProvisioner.install }}
+---
 kind: Job
 apiVersion: batch/v1
 metadata:
