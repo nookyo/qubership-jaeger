@@ -1152,7 +1152,6 @@ Prepare args for readiness-probe container.
                 - "-keyPath=/cassandra-tls/client-key.pem"
                 {{- end }}
             {{- end }}
-            {{- end }}
         {{- else }}
                 - "-storage=opensearch"
                 - "-host={{ include "elasticsearch.url" . }}"
@@ -1166,7 +1165,6 @@ Prepare args for readiness-probe container.
                 - "-crtPath=/es-tls/client-cert.pem"
                 - "-keyPath=/es-tls/client-key.pem"
                 {{- end }}
-            {{- end }}
             {{- end }}
         {{- end }}
     {{- end }}
