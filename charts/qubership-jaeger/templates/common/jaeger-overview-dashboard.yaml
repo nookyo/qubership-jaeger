@@ -1,4 +1,5 @@
 {{- if .Values.jaeger.prometheusMonitoringDashboard }}
+---
 apiVersion: integreatly.org/v1alpha1
 kind: GrafanaDashboard
 metadata:

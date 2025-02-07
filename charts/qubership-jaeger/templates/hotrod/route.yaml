@@ -1,4 +1,5 @@
 {{- if and .Values.hotrod.install .Values.hotrod.route.install}}
+---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
