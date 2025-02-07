@@ -4,6 +4,7 @@
 {{- $jaegergrpcTlsConfigEnabled := .Values.collector.tlsConfig.jaegergRPC.enabled }}
 {{- $zipkinTlsConfigEnabled := .Values.collector.tlsConfig.zipkin.enabled }}
 {{- if .Values.collector.install }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

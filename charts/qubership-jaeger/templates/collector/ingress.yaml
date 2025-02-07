@@ -1,5 +1,6 @@
 {{- if and .Values.collector.install .Values.collector.ingress.install }}
 {{- $defaultServiceName := printf "%s-collector" $.Values.jaeger.serviceName -}}
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

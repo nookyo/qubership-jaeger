@@ -1,4 +1,5 @@
 {{- if .Values.elasticsearch.rollover.install }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
