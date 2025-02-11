@@ -11,6 +11,11 @@ metadata:
     app.kubernetes.io/component: jaeger-integration-tests
     app.kubernetes.io/part-of: jaeger
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded,hook-failed 
 spec:
   {{- if or (gt .Capabilities.KubeVersion.Major "1") (ge .Capabilities.KubeVersion.Minor "12") }}
   ttlSecondsAfterFinished: {{ .Values.statusProvisioner.lifetimeAfterCompletion | default 300 }}

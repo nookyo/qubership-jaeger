@@ -52,6 +52,10 @@ spec:
       port: 14269
       protocol: TCP
       targetPort: 14269
+    - name: healthcheck
+      port: 13133
+      protocol: TCP
+      targetPort: 13133
   selector:
     app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-collector
     app.kubernetes.io/component: collector

@@ -106,7 +106,7 @@ Image can be found from:
   {{- if .Values.collector.image -}}
     {{- printf "%s" .Values.collector.image -}}
   {{- else -}}
-    {{- print "jaegertracing/jaeger-collector:1.62.0" -}}
+    {{- print "jaegertracing/jaeger:2.2.0" -}}
   {{- end -}}
 {{- end -}}
 
@@ -119,7 +119,7 @@ Image can be found from:
   {{- if .Values.query.image -}}
     {{- printf "%s" .Values.query.image -}}
   {{- else -}}
-    {{- print "jaegertracing/jaeger-query:1.62.0" -}}
+    {{- print "jaegertracing/jaeger:2.2.0" -}}
   {{- end -}}
 {{- end -}}
 
@@ -1169,7 +1169,15 @@ Prepare args for readiness-probe container.
         {{- end }}
     {{- end }}
 {{- end -}}
-
+{{- define "collector.args" -}}
+    {{- if .Values.collector.args }}
+        {{- range .Values.collector.args }}
+            - {{ . | quote }}
+        {{- end }}
+    {{- else }}
+            - "--config=/conf/config.yaml"
+    {{- end }}
+{{- end -}}
 {{- define "jaeger.monitoredImages" -}}
     {{- if .Values.agent.install -}}
       {{- printf "daemonset %s-agent %s %s, " .Values.jaeger.serviceName .Values.agent.name "jaegertracing/jaeger-agent:1.62.0" -}}

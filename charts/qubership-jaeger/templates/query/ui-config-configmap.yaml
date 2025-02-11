@@ -19,7 +19,10 @@ metadata:
   {{- end }}
 data:
   query-ui-config.json: >-
-    {
+    { "dependencies": {
+      "dagMaxNumServices": 200,
+      "menuEnabled": true
+      },
       "menu":[
         {
           "items":[
