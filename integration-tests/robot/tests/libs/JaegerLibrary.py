@@ -1,7 +1,7 @@
+import datetime
 import json
 import random
 from datetime import timezone
-import datetime
 
 
 def generate_trace():
