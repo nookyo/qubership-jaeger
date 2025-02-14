@@ -19,14 +19,8 @@ updates:
     open-pull-requests-limit: 20
   # Docker bot configurations
   - package-ecosystem: "docker"
-    directory: "/readiness-probe"
-    schedule:
-      interval: "monthly"
-  - package-ecosystem: "docker"
-    directory: "/integration-tests"
-    schedule:
-      interval: "monthly"
-  - package-ecosystem: "docker"
-    directory: "/integration-tests"
+    directories:
+      - "/readiness-probe"
+      - "/integration-tests"
     schedule:
       interval: "monthly"
