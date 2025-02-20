@@ -5,7 +5,7 @@
 # Include to check only CRDs and config file
 yaml-files:
 - 'monitoring.coreos.com*.yaml'
-- 'netcracker.com*.yaml'
+- 'qubership.org*.yaml'
 - 'integreatly.org*.yaml'
 - '.yamllint.yaml'
 
