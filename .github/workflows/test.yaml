@@ -58,6 +58,6 @@ jobs:
             ref: ${{ github.event.inputs.version }}
             download-artifact: false
             dry-run: true
-            component: ${{ github.event.inputs.component }}
+            component: ${{ inputs.component }}
 
 
