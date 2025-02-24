@@ -55,7 +55,7 @@ jobs:
         # needs: [tag]
         uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
         with:
-            ref: ${{ github.event.inputs.version }}
+            ref: ${{ inputs.version }}
             download-artifact: false
             dry-run: true
             component: ${{ inputs.component }}
