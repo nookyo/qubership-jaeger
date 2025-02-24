@@ -59,6 +59,6 @@ jobs:
             ref: ${{ inputs.version }}
             download-artifact: false
             dry-run: true
-            component: ${{ fromJson(inputs.component) }}
+            component: ${{ inputs.component }}
 
 
