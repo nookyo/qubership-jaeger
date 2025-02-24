@@ -40,6 +40,10 @@ jobs:
                     echo "image=ghcr.io/${{ github.repository_owner }}/${{ matrix.component.name }}" >> $GITHUB_OUTPUT
                 fi
 
+            - name: debug
+              run:  echo ${{ steps.conditions.outputs.image}} }}
+
+
 
 
 
