@@ -1,0 +1,23 @@
+name: test multi build docker images
+
+on:
+    workflow_dispatch:
+        inputs:
+            content:
+                default:  '[
+                    {"name": "jaeger-integration-tests", "file": "integration-tests/Dockerfile", "context": "integration-tests"},
+                    {"name": "jaeger-readiness-probe", "file": "readiness-probe/Dockerfile", "context": "readiness-probe"},
+                    {"name": "jaeger-transfer", "file": "docker/Dockerfile", "context": "docker"}
+                  ]'
+                description: 'content'
+                required: true
+
+jobs:
+    multiplatform_build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Debug
+              run: echo ${{ github.event.inputs.content }}
