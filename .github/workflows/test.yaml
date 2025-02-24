@@ -25,7 +25,6 @@ jobs:
         uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
         with:
             ref: ${{ github.event.inputs.version }}
-            context: ${{ fromJson(github.event.inputs.component)}}
             download-artifact: false
             dry-run: true
             component: ${{ fromJson(github.event.inputs.component)}}
