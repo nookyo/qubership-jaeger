@@ -16,7 +16,8 @@ jobs:
     multiplatform_build:
         runs-on: ubuntu-latest
         strategy:
-            matrix: ${{ fromJson(github.event.inputs.content) }}
+            matrix:
+                include: ${{ fromJson(github.event.inputs.content) }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
