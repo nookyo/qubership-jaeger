@@ -34,19 +34,11 @@ jobs:
             - name: Conditions
               id: conditions
               run: |
-                if [ -n ${{ inputs.artifact-id }} ]; then
-                    echo "image=ghcr.io/${{ github.repository_owner }}/${{ inputs.artifact-id }} >> $GITHUB_OUTPUT
+                if [ -n "${{ inputs.artifact-id }}" ]; then
+                    echo "image=ghcr.io/${{ github.repository_owner }}/${{ inputs.artifact-id }}" >> $GITHUB_OUTPUT
                 else
-                    echo "image=ghcr.io/${{ github.repository_owner }}/${{ matrix.component.name }} >> $GITHUB_OUTPUT
+                    echo "image=ghcr.io/${{ github.repository_owner }}/${{ matrix.component.name }}" >> $GITHUB_OUTPUT
                 fi
-
-            - name: Set output
-              run: |
-                   echo image = ${{ steps.conditions.outputs.image }}
-
-
-
-
 
 
 
