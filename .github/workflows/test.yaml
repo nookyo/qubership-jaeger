@@ -19,29 +19,29 @@ on:
                 required: true
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                component: ${{fromJson(github.event.inputs.component)}}
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    # test:
+    #     runs-on: ubuntu-latest
+    #     strategy:
+    #         matrix:
+    #             component: ${{fromJson(github.event.inputs.component)}}
+    #     steps:
+    #         - name: Checkout
+    #           uses: actions/checkout@v4
 
-            - name: Run tests
-              run: echo "Running tests for ${{ github.event.inputs.component }}"
+    #         - name: Run tests
+    #           run: echo "Running tests for ${{ github.event.inputs.component }}"
 
-            - name: Conditions
-              id: conditions
-              run: |
-                if [ -n "${{ inputs.artifact-id }}" ]; then
-                    echo "image=ghcr.io/${{ github.repository_owner }}/${{ inputs.artifact-id }}" >> $GITHUB_OUTPUT
-                else
-                    echo "image=ghcr.io/${{ github.repository_owner }}/${{ matrix.component.name }}" >> $GITHUB_OUTPUT
-                fi
+    #         - name: Conditions
+    #           id: conditions
+    #           run: |
+    #             if [ -n "${{ inputs.artifact-id }}" ]; then
+    #                 echo "image=ghcr.io/${{ github.repository_owner }}/${{ inputs.artifact-id }}" >> $GITHUB_OUTPUT
+    #             else
+    #                 echo "image=ghcr.io/${{ github.repository_owner }}/${{ matrix.component.name }}" >> $GITHUB_OUTPUT
+    #             fi
 
-            - name: debug
-              run:  echo ${{ steps.conditions.outputs.image }}
+    #         - name: debug
+    #           run:  echo ${{ steps.conditions.outputs.image }}
 
 
 
@@ -51,13 +51,13 @@ jobs:
     #     uses: netcracker/qubership-workflow-hub/.github/workflows/tag-creator.yml@main
     #     with:
     #       tag-name: ${{ github.event.inputs.version }}
-    # docker-build:
-    #     # needs: [tag]
-    #     uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
-    #     with:
-    #         ref: ${{ github.event.inputs.version }}
-    #         download-artifact: false
-    #         dry-run: true
-    #         component: ${{ github.event.inputs.component }}
+    docker-build:
+        # needs: [tag]
+        uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
+        with:
+            ref: ${{ github.event.inputs.version }}
+            download-artifact: false
+            dry-run: true
+            component: ${{ github.event.inputs.component }}
 
 
