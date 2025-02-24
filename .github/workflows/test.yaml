@@ -3,24 +3,31 @@ name: Test
 on:
     workflow_dispatch:
         inputs:
-            content:
+            version:
+                description: 'Version'
+                required: true
+            component:
                 default:  '[
                     {"name": "jaeger-integration-tests", "file": "integration-tests/Dockerfile", "context": "integration-tests"},
                     {"name": "jaeger-readiness-probe", "file": "readiness-probe/Dockerfile", "context": "readiness-probe"},
                     {"name": "jaeger-transfer", "file": "docker/Dockerfile", "context": "docker"}
                   ]'
-                description: 'content'
+                description: 'component'
                 required: true
 
 jobs:
-    multiplatform_build:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                include: ${{ fromJson(github.event.inputs.content) }}
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    # tag:
+    #     uses: netcracker/qubership-workflow-hub/.github/workflows/tag-creator.yml@main
+    #     with:
+    #       tag-name: ${{ github.event.inputs.version }}
+    docker-build:
+        # needs: [tag]
+        uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
+        with:
+            ref: ${{ github.event.inputs.version }}
+            context: ${{ fromJson(github.event.inputs.component)}}
+            download-artifact: false
+            dry-run: true
+            component: ${{ fromJson(github.event.inputs.component)}}
 
-            - name: Debug
-              run: echo ${{ github.event.inputs.content }}
+
