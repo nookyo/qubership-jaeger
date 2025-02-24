@@ -1,4 +1,4 @@
-name: test multi build docker images
+name: Test
 
 on:
     workflow_dispatch:
