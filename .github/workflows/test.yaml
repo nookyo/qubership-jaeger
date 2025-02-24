@@ -13,7 +13,7 @@ on:
                 default:  '[
                     {"name": "jaeger-integration-tests", "file": "integration-tests/Dockerfile", "context": "integration-tests"},
                     {"name": "jaeger-readiness-probe", "file": "readiness-probe/Dockerfile", "context": "readiness-probe"},
-                    {"name": "jaeger-transfer", "file": "docker/Dockerfile", "context": "docker"}
+                    {"name": "jaeger-transfer", "file": "docker/Dockerfile", "context": "docker-transfer"}
                   ]'
                 description: 'component'
                 required: true
