@@ -11,14 +11,14 @@ metadata:
     app.kubernetes.io/instance: {{ cat .Values.jaeger.serviceName "-collector-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
     app.kubernetes.io/component: collector
     {{- include "jaeger.commonLabels" . | nindent 4 }}
-    {{- if .Values.collector.ingress.labels }}
-      {{- toYaml .Values.collector.ingress.labels | nindent 4 }}
+    {{- if .Values.collector.ingress.http.labels }}
+      {{- toYaml .Values.collector.ingress.http.labels | nindent 4 }}
     {{- end }}
-  {{- if .Values.collector.ingress.annotations }}
+  {{- if .Values.collector.ingress.http.annotations }}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2   # mandatory annotation
     nginx.ingress.kubernetes.io/use-regex: 'true'     # mandatory annotation
-    {{- toYaml .Values.collector.ingress.annotations | nindent 4 }}
+    {{- toYaml .Values.collector.ingress.http.annotations | nindent 4 }}
   {{- end }}
 spec:
   {{- if .Values.collector.ingress.className }}
