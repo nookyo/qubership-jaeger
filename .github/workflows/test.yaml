@@ -41,7 +41,7 @@ jobs:
                 fi
 
             - name: debug
-              run:  echo ${{ steps.conditions.outputs.image }} }}
+              run:  echo ${{ steps.conditions.outputs.image }}
 
 
 
