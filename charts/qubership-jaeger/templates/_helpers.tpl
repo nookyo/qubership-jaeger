@@ -94,6 +94,8 @@ Return list of paths and endpoints for one host
 {{- define "collector.ingress.grpc.hostPaths" -}}
 {{/* Restore the global context in the "$" */}}
 {{/* Start render template in the relative content, here .Values.jaeger.collector.ingress.grpc.hosts */}}
+{{- $ := index . 0 }}
+{{- $defaultServiceName := printf "%s-collector" $.Values.jaeger.serviceName -}}
 {{- with index . 0 }}
 {{- $pathsToApply := coalesce .paths $.Values.collector.ingress.grpc.defaultPaths -}}
 {{- range $pathsToApply }}
@@ -101,7 +103,7 @@ Return list of paths and endpoints for one host
   pathType: Prefix
   backend:
     service:
-      name: {{ .service.name }}
+      name: {{ coalesce .service.name $defaultServiceName }}
       port:
         number: {{ .service.port }}
 {{- end -}}
