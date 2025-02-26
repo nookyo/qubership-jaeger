@@ -1527,11 +1527,11 @@ collector:
     cors:
       allowedHeaders: ""
   
-    # Comma-separated CORS allowed origins.
-    # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
-    # Type: string
-    #
-    allowedOrigins: ""
+      # Comma-separated CORS allowed origins.
+      # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
+      # Type: string
+      #
+      allowedOrigins: ""
 
 
     # KeepAlive configures allow Keep-Alive for Zipkin HTTP server
