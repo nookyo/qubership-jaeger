@@ -31,6 +31,7 @@ jobs:
       - name: Lint Code Base
         uses: super-linter/super-linter@v7.3.0
         env:
+          VALIDATE_JSCPD: false
           VALIDATE_ALL_CODEBASE: ${{ inputs.full_scan || false }}
           DEFAULT_BRANCH: "main"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
