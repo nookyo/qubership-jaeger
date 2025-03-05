@@ -2,4 +2,4 @@
 *.tar.gz
 .vscode
 **/last
-*/charts/qubershp-jaeger/templates
+*/charts/qubership-jaeger/templates
