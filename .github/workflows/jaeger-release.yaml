@@ -126,12 +126,17 @@ jobs:
       version: ${{ github.event.inputs.version }}
       publish: false
 
-  
   upload-assets:
     needs: [tag, docker-build]
-    uses: netcracker/qubership-workflow-hub/actions/archive-and-upload-assets@main
-    with:
-      config-path: './.github/assets-config.yaml'
-      dist-path: './dist'
-      upload: true
-      ref: v${{ github.event.inputs.version }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Archive and Upload Assets
+        uses: netcracker/qubership-workflow-hub/actions/archive-and-upload-assets@main
+        with:
+          config-path: './.github/assets-config.yaml'
+          dist-path: './dist'
+          upload: true
+          ref: v${{ github.event.inputs.version }}
