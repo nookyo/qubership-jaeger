@@ -100,7 +100,7 @@ jobs:
           chart-yaml-path: ${{ github.event.inputs.path-to-chart }}
 
       - name: Run Commit and Push Action
-        uses: netcracker/qubership-workflow-hub/actions/commit-and-push@main
+        uses: Netcracker/qubership-workflow-hub/actions/commit-and-push@main
         with:
           commit_message: "Update chart version to v${{ github.event.inputs.version }}"
   tag:
@@ -120,7 +120,7 @@ jobs:
       platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
 
   github-release:
-    needs: [tag]
+    needs: [tag, docker-build]
     uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@main
     with:
       version: ${{ github.event.inputs.version }}
@@ -142,3 +142,4 @@ jobs:
           ref: v${{ github.event.inputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
