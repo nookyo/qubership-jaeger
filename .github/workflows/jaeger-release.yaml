@@ -127,7 +127,7 @@ jobs:
       publish: false
 
   upload-assets:
-    needs: [tag]
+    needs: [github-release]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
