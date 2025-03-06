@@ -11,11 +11,9 @@ env:
 
 on:
   push:
-    branches:
-      - "feature/json_audit_logs"
+    branches: [ "feature/json_audit_logs" ]
   pull_request_target:
-    branches:
-      - "feature/json_audit_logs"
+    branches: [ "feature/json_audit_logs" ]
   workflow_dispatch:
     inputs:
       full_scan:
