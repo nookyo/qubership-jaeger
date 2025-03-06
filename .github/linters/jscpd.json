@@ -1,9 +1,0 @@
-{
-  "threshold": 0,
-  "configurations": {
-    "reporters": ["html", "markdown"],
-    "ignore": [
-        "**/templates/**"
-    ]
-  }
-}
