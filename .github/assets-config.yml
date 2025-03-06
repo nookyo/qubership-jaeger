@@ -3,5 +3,5 @@ archives:
     outputName: helm-charts
     archiveType: tar.gz
   - source: docs
-    outputName: docks
+    outputName: docs
     archiveType: tar
