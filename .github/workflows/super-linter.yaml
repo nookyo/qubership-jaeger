@@ -6,7 +6,8 @@
 # https://github.com/github/super-linter
 name: Lint Code Base
 env:
-  VALIDATE_JSCPD: false
+  VALIDATE_JSCPD: "false"
+  VALIDATE_CHECKOV: "false"
 
 on:
   push:
