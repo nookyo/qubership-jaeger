@@ -140,3 +140,5 @@ jobs:
           dist-path: './dist'
           upload: true
           ref: v${{ github.event.inputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
