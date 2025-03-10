@@ -1029,7 +1029,13 @@ cassandraSchemaJob:
   # Type: object
   # Mandatory: no
   #
-  resources: {}
+  resources:
+    requests:
+      cpu: 50m
+      memory: 50Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
 
   # SecurityContext holds pod-level security attributes.
   # The parameters are required if a Pod Security Policy is enabled
