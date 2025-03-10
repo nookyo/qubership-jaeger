@@ -8,7 +8,7 @@ name: Lint Code Base
 env:
   VALIDATE_JSCPD: "false"
   VALIDATE_CHECKOV: "false"
-  YAML_PRETTIER: "false"
+  VALIDATE_YAML_PRETTIER: "false"
 
 on:
   push:
