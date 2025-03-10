@@ -8,7 +8,6 @@ name: Lint Code Base
 env:
   VALIDATE_JSCPD: "false"
   VALIDATE_CHECKOV: "false"
-  VALIDATE_YAML_PRETTIER: "false"
 
 on:
   push:
@@ -38,3 +37,4 @@ jobs:
           VALIDATE_ALL_CODEBASE: ${{ inputs.full_scan || false }}
           DEFAULT_BRANCH: "main"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_YAML_PRETTIER: "false"
