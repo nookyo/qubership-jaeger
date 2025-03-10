@@ -37,4 +37,4 @@ jobs:
           VALIDATE_ALL_CODEBASE: ${{ inputs.full_scan || false }}
           DEFAULT_BRANCH: "main"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FIX_YAML_PRETTIER: "false"
+          FIX_YAML_PRETTIER: "true"
