@@ -2,12 +2,15 @@
 .flake8 text
 .gitattributes text
 .gitignore text
+.gitleaksignore text
 .helmignore text
 .prettierignore text
+.yamlignore text
 
 * text=auto
 *.env text eol=lf
 *.go text
+*.js text
 *.json text
 *.md text
 *.mod text
@@ -26,7 +29,3 @@ CODEOWNERS text
 
 /CHANGELOG.md merge=union
 /contributors.json merge=union
-/CODE-OF-CONDUCT.md text
-/CONTRIBUTING.md text
-/README.md text
-/SECURITY.md text
