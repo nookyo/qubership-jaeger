@@ -7,9 +7,9 @@
 name: Lint Code Base
 
 on:
-  push:
-  pull_request:
-  merge_group:
+  push: null
+  pull_request: null
+  merge_group: null
   workflow_dispatch:
     inputs:
       full_scan:
@@ -51,3 +51,4 @@ jobs:
         DEFAULT_BRANCH: "main"
         # To report GitHub Actions status checks
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
