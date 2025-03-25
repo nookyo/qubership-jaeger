@@ -126,16 +126,16 @@ jobs:
       - name: Echo metadata 
         run: 'echo Metadata result: ${{ steps.metadata.outputs.result }} >> $GITHUB_STEP_SUMMARY'     
  
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.artifact-name }}
+      # - name: Download artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: ${{ inputs.artifact-name }}
 
-      - name: Debug
-        run: |
-              ls -la  
-              ls -la dbaas-aggregator
-              ls -la dbaas-aggregator/target  
+      # - name: Debug
+      #   run: |
+      #         ls -la  
+      #         ls -la dbaas-aggregator
+      #         ls -la dbaas-aggregator/target  
   docker-build:
     needs: [perform-version, load-docker-build-components]
     uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
