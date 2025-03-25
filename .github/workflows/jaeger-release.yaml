@@ -111,7 +111,7 @@ jobs:
 
   docker-build:
     needs: [load-docker-build-components]
-    uses: netcracker/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
+    uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
     with:
       ref: v${{ inputs.version }}
       download-artifact: false
