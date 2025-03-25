@@ -113,7 +113,7 @@ jobs:
     needs: [load-docker-build-components]
     uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
     with:
-      ref: v${{ inputs.version }}
+      ref: ${{ github.event.ref }}
       download-artifact: false
       dry-run: ${{ inputs.dry-run }}
       component: ${{ needs.load-docker-build-components.outputs.component }}
