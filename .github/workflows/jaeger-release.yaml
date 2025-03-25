@@ -108,9 +108,36 @@ jobs:
   #   uses: netcracker/qubership-workflow-hub/.github/workflows/tag-creator.yml@main
   #   with:
   #     tag-name: "v${{ github.event.inputs.version }}"
-
-  docker-build:
+  perform-version:
+    runs-on: ubuntu-latest
     needs: [load-docker-build-components]
+    outputs:
+       metadata: "${{ steps.metadata.outputs.result }}"
+    steps:
+      - name : Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create name
+        uses: nookyo/qubership-workflow-hub/actions/metadata-action@main
+        id: metadata
+        with:
+          configuration-path: .github/metadata-config.yml
+
+      - name: Echo metadata 
+        run: 'echo Metadata result: ${{ steps.metadata.outputs.result }} >> $GITHUB_STEP_SUMMARY'     
+ 
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+
+      - name: Debug
+        run: |
+              ls -la  
+              ls -la dbaas-aggregator
+              ls -la dbaas-aggregator/target  
+  docker-build:
+    needs: [perform-version, load-docker-build-components]
     uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
     with:
       ref: ${{ github.event.ref }}
@@ -118,6 +145,7 @@ jobs:
       dry-run: ${{ inputs.dry-run }}
       component: ${{ needs.load-docker-build-components.outputs.component }}
       platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
+      tags-override: ${{ needs.perform-version.outputs.metadata }}
 
   # github-release:
   #   needs: [tag, docker-build]
