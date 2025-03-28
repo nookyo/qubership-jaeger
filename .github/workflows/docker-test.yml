@@ -13,11 +13,6 @@ on:
         required: false
         type: string
         default: ''
-      java-version:
-        description: 'Java version (e.g., 21)'
-        required: false
-        type: string
-        default: "21"
       dry-run:
         description: 'Dry run'
         required: false
