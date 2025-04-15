@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Lint Code Base
-        uses: actions/checkout/slim@v7.3.0
+        uses: super-linter/super-linter/slim@v7.3.0
         with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
