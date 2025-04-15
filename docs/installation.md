@@ -237,7 +237,7 @@ Collector:
 | collector | 50m          | 64Mi            | 100m       | 128Mi         |
 | query     | 100m         | 64Mi            | 150m       | 128Mi         |
 
-For more information about Jaeger's performance, refer to the [Jaeger Service Performance Monitoring](/docs/public/performance.md)
+For more information about Jaeger's performance, refer to the [Jaeger Service Performance Monitoring](/docs/performance.md)
 section in the _Cloud Platform Monitoring Guide_.
 
 **Note**: The above resources are required for starting, not for working under load. For production, the resources
@@ -277,7 +277,7 @@ Total number of spans = Number of spans per second * Retention period in seconds
 
 **Warning!** TTL for Jaeger's Cassandra tables **can't be changed** during update!
 You must set correct TTL values during first deploy! If you didn't do it, please read the
-[Maintenance: Change Cassandra TTL](/docs/public/maintenance.md#change-cassandra-ttl).
+[Maintenance: Change Cassandra TTL](/docs/maintenance.md#change-cassandra-ttl).
 
 To find the retention period see `ttl` for [Cassandra](#cassandra) and `numberOfDays` for
 [Elasticsearch\/Opensearch](#index-cleaner).
