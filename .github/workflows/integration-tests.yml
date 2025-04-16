@@ -6,7 +6,7 @@ on:
     workflows: ["Build Docker with Matrix Strategy"]
     types:
     - completed
-  workflow_dispatch:
+  workflow_dispatch: {}
   pull_request:
     branches:
     - main
@@ -41,7 +41,7 @@ jobs:
 
     - name: Install cert-manager
       run: |
-        helm repo add jetstack https://charts.jetstack.io --force-update 
+        helm repo add jetstack https://charts.jetstack.io --force-update
         helm upgrade --install cert-manager jetstack/cert-manager --namespace cert-manager \
           --create-namespace --version v1.16.3 --set prometheus.enabled=true   --set crds.enabled=true
 
@@ -50,13 +50,13 @@ jobs:
         helm repo add k8ssandra https://helm.k8ssandra.io/stable --force-update
         helm upgrade --install k8ssandra-operator k8ssandra/k8ssandra-operator \
           --namespace ${{ env.cassandra_namespace }} --create-namespace
-    
+
     - name: Check k8ssandra-operator pod status
-      run: |    
+      run: |
         attempt=1
         max_attempts=${{ env.max_attempts }}
         while [[ $attempt -le $max_attempts ]]; do
-          echo "Attempt $attempt/$max_attempts: Checking k8ssandra-operator pod status..."  
+          echo "Attempt $attempt/$max_attempts: Checking k8ssandra-operator pod status..."
           phase=$(kubectl get pod -l app.kubernetes.io/name=k8ssandra-operator -n ${{ env.cassandra_namespace }} -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "NotFound")
           ready=$(kubectl get pod -l app.kubernetes.io/name=k8ssandra-operator -n ${{ env.cassandra_namespace }} -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "NotFound")
           scheduled=$(kubectl get pod -l app.kubernetes.io/name=k8ssandra-operator -n ${{ env.cassandra_namespace }} -o jsonpath='{.items[0].status.conditions[?(@.type=="PodScheduled")].status}' 2>/dev/null || echo "SchedulingError")
@@ -67,15 +67,15 @@ jobs:
             echo "k8ssandra-operator pod is not ready yet."
             sleep ${{ env.delay }}
             ((attempt++))
-          elif [[ "$phase" == "Pending" and "$scheduled" == "True"]]; then
+          elif [[ "$phase" == "Pending" && "$scheduled" == "True" ]]; then
             echo "k8ssandra-operator pod status: $phase. Retrying in ${{ env.delay }} seconds..."
             sleep ${{ env.delay }}
             ((attempt++))
-          else 
+          else
             echo "k8ssandra-operator pod status: $phase"
             cass_operator_pod=$(kubectl get pods -l app.kubernetes.io/name=k8ssandra-operator -n ${{ env.cassandra_namespace }})
             kubectl get events -n ${{ env.cassandra_namespace }} --for pod/"$cass_operator_pod"
-            exit 1  
+            exit 1
           fi
         done
         if [[ "$ready" != "True" && "$phase" != "Running" ]]; then
@@ -85,7 +85,7 @@ jobs:
           kubectl get events -n ${{ env.cassandra_namespace }}
           exit 1
         fi
-    
+
     - name: Deploy k8ssandra cluster
       run: |
         cat <<EOF | kubectl apply -n ${{ env.cassandra_namespace }} -f -
@@ -112,7 +112,7 @@ jobs:
                   jvmOptions:
                     heapSize: 512M
         EOF
-    
+
     - name: Check k8ssandra cluster status
       run: |
         attempt=1
@@ -135,7 +135,7 @@ jobs:
             echo "k8ssandra cluster status: $phase. Retrying in ${{ env.delay }} seconds..."
             sleep ${{ env.delay }}
             ((attempt++))
-          else 
+          else
             echo "k8ssandra cluster status: $phase"
             cassandra_pod=$(kubectl get pods -l app.kubernetes.io/name=cassandra -n ${{ env.cassandra_namespace }})
             kubectl get events -n ${{ env.cassandra_namespace }} --for pod/"$cassandra_pod"
@@ -160,7 +160,7 @@ jobs:
           --set "cassandraSchemaJob.host=$CASSANDRA_SVC" --set "cassandraSchemaJob.username=$CASSANDRA_USER" \
           --set "cassandraSchemaJob.password=$CASSANDRA_PASSWORD" --set cassandraSchemaJob.datacenter=dc1 \
           --set "readinessProbe.image=ghcr.io/netcracker/jaeger-readiness-probe:$TAG"
-        
+
     - name: Cleanup
       run: |
         kind delete cluster
