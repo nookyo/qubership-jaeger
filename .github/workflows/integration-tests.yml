@@ -155,14 +155,14 @@ jobs:
         echo "Checking if readiness-probe image is available"
         docker pull ghcr.io/netcracker/jaeger-readiness-probe:"$TAG"
         kind load docker-image ghcr.io/netcracker/jaeger-readiness-probe:"$TAG"
-        CASSANDRA_USER=$(kubectl get secret -n k8ssandra-operator cassandra-superuser -o json | jq -r '.data.username' | base64 -d)
-        CASSANDRA_PASSWORD=$(kubectl get secret -n k8ssandra-operator cassandra-superuser -o json | jq -r '.data.password' | base64 -d)
-        CASSANDRA_SVC=cassandra-dc1-service.k8ssandra-operator
-        helm upgrade --install qubership-jaeger ./qubership-jaeger/charts/qubership-jaeger --namespace jaeger \
-          --create-namespace --set jaeger.prometheusMonitoringDashboard=false --set jaeger.prometheusMonitoring=false \
+        CASSANDRA_USER=$(kubectl get secret -n ${{ env.cassandra_namespace }} cassandra-superuser -o json | jq -r '.data.username' | base64 -d)
+        CASSANDRA_PASSWORD=$(kubectl get secret -n ${{ env.cassandra_namespace }} cassandra-superuser -o json | jq -r '.data.password' | base64 -d)
+        CASSANDRA_SVC="cassandra-dc1-service.${{ env.cassandra_namespace }}"
+        helm upgrade --install qubership-jaeger ./qubership-jaeger/charts/qubership-jaeger --namespace ${{ env.namespace }} \
+          --create-namespace --debug --set jaeger.prometheusMonitoringDashboard=false --set jaeger.prometheusMonitoring=false \
           --set "cassandraSchemaJob.host=$CASSANDRA_SVC" --set "cassandraSchemaJob.username=$CASSANDRA_USER" \
           --set "cassandraSchemaJob.password=$CASSANDRA_PASSWORD" --set cassandraSchemaJob.datacenter=dc1 \
-          --set "readinessProbe.image=ghcr.io/netcracker/jaeger-readiness-probe:$TAG"
+          --set "readinessProbe.image=ghcr.io/netcracker/jaeger-readiness-probe:$TAG" || kubectl get pods -n ${{ env.namespace}}; kubectl get events -n ${{ env.namespace }}
 
     - name: Cleanup
       run: |
