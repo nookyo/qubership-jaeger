@@ -152,6 +152,9 @@ jobs:
     - name: Install jaeger
       run: |
         TAG="${GITHUB_SHA:0:11}"
+        echo "Checking if readiness-probe image is available"
+        docker pull ghcr.io/netcracker/jaeger-readiness-probe:"$TAG"
+        kind load docker-image ghcr.io/netcracker/jaeger-readiness-probe:"$TAG"
         CASSANDRA_USER=$(kubectl get secret -n k8ssandra-operator cassandra-superuser -o json | jq -r '.data.username' | base64 -d)
         CASSANDRA_PASSWORD=$(kubectl get secret -n k8ssandra-operator cassandra-superuser -o json | jq -r '.data.password' | base64 -d)
         CASSANDRA_SVC=cassandra-dc1-service.k8ssandra-operator
