@@ -119,15 +119,15 @@ spec:
             - containerPort: 8080
               protocol: TCP
           readinessProbe:
-            failureThreshold: 1
+            failureThreshold: 3
             httpGet:
               path: /health
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 5
-            periodSeconds: 600
+            periodSeconds: 60
             successThreshold: 1
-            timeoutSeconds: 900
+            timeoutSeconds: 90
           livenessProbe:
             failureThreshold: 1
             httpGet:
@@ -222,15 +222,15 @@ spec:
             timeoutSeconds: 1
           {{- if .Values.readinessProbe.install }}
           readinessProbe:
-            failureThreshold: 1
+            failureThreshold: 3
             httpGet:
               path: /health
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 1
-            periodSeconds: 300
+            periodSeconds: 30
             successThreshold: 1
-            timeoutSeconds: 600
+            timeoutSeconds: 60
           {{- else }}
           readinessProbe:
             failureThreshold: 3
