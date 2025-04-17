@@ -34,22 +34,26 @@ jobs:
         chmod +x ./kind
         sudo mv ./kind /usr/local/bin/
         kind create cluster
+      shell: bash
 
     - name: Install Helm
       run: |
         curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      shell: bash
 
     - name: Install cert-manager
       run: |
         helm repo add jetstack https://charts.jetstack.io --force-update
         helm upgrade --install cert-manager jetstack/cert-manager --namespace cert-manager \
           --create-namespace --version v1.16.3 --set prometheus.enabled=true   --set crds.enabled=true
+      shell: bash
 
     - name: Install k8ssandra operator
       run: |
         helm repo add k8ssandra https://helm.k8ssandra.io/stable --force-update
         helm upgrade --install k8ssandra-operator k8ssandra/k8ssandra-operator \
           --namespace ${{ env.cassandra_namespace }} --create-namespace
+      shell: bash
 
     - name: Check k8ssandra-operator pod status
       run: |
@@ -85,6 +89,7 @@ jobs:
           kubectl get events -n ${{ env.cassandra_namespace }}
           exit 1
         fi
+      shell: bash
 
     - name: Deploy k8ssandra cluster
       run: |
@@ -112,6 +117,7 @@ jobs:
                   jvmOptions:
                     heapSize: 512M
         EOF
+      shell: bash
 
     - name: Check k8ssandra cluster status
       run: |
@@ -149,6 +155,8 @@ jobs:
           kubectl get events -n ${{ env.cassandra_namespace }}
           exit 1
         fi
+      shell: bash
+
     - name: Install jaeger
       run: |
         TAG="${GITHUB_SHA:0:11}"
@@ -156,7 +164,7 @@ jobs:
         CASSANDRA_PASSWORD=$(kubectl get secret -n ${{ env.cassandra_namespace }} cassandra-superuser -o json | jq -r '.data.password' | base64 -d)
         CASSANDRA_SVC="cassandra-dc1-service.${{ env.cassandra_namespace }}"
         helm upgrade --install qubership-jaeger ./qubership-jaeger/charts/qubership-jaeger --namespace ${{ env.namespace }} \
-          --create-namespace --debug --set jaeger.prometheusMonitoringDashboard=false --set jaeger.prometheusMonitoring=false \
+          --create-namespace --set jaeger.prometheusMonitoringDashboard=false --set jaeger.prometheusMonitoring=false \
           --set "cassandraSchemaJob.host=$CASSANDRA_SVC" --set "cassandraSchemaJob.username=$CASSANDRA_USER" \
           --set "cassandraSchemaJob.password=$CASSANDRA_PASSWORD" --set cassandraSchemaJob.datacenter=dc1 \
           --set "readinessProbe.image=ghcr.io/netcracker/jaeger-readiness-probe:$TAG"
@@ -167,7 +175,7 @@ jobs:
       run: |
         mkdir artifacts
         kubectl get pods -n ${{ env.namespace }} > artifacts/pods.txt
-        kubectl get events -n ${{ env.namespace }} > artifacts/events.txt
+        kubectl get events -n ${{ env.namespace }} --sort-by=.metadata.creationTimestamp > artifacts/events.txt
         kubectl get pods -n ${{ env.namespace }} -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.spec.containers[*].name}{"\n"}{end}' | while read -r pod containers; do
           for container in $containers; do
             echo "Fetching logs for pod: $pod, container: $container"
