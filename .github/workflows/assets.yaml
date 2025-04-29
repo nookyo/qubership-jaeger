@@ -40,4 +40,6 @@ jobs:
                 ref: v${{ github.event.inputs.version }}
                 config-path: './.github/assets-config.yml'
                 upload: true
-
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ 
