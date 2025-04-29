@@ -1,0 +1,29 @@
+name: TEst Assetst Workflow
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        default: '0.0.1'
+        required: false
+
+jobs:
+    assets:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Create tag
+              uses: nookyo/qubership-workflow-hub/actions/tag-action@main
+              with:
+                ref: ${{ github.event.ref }}
+                tag-name: "v${{ github.event.inputs.version }}"
+
+
+            - name: Load docker build components
+              uses: nookyo/qubership-workflow-hub/actions/archive-and-upload-assets@main
+              with:
+                ref: v${{ github.event.inputs.version }}
+                config-path: './.github/assets-config.yml'
+
