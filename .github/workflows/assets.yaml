@@ -31,6 +31,9 @@ jobs:
         needs: [github-release]
         runs-on: ubuntu-latest
         steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
             - name: Assets processing
               uses: nookyo/qubership-workflow-hub/actions/archive-and-upload-assets@main
               with:
