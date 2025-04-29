@@ -5,3 +5,14 @@ archives:
   - source: docs
     outputName: docs
     archiveType: tar
+files:
+  - source: charts/qubership-jaeger/Chart.yaml
+    outputName: chart.yaml
+  - source: charts/qubership-jaeger/values.yaml
+    outputName: values.yaml
+  - source: README.md
+    outputName: README.md
+  - source: LICENSE
+    outputName: LICENSE
+  - source: CONTRIBUTING.md
+    outputName: CONTRIBUTING.md
