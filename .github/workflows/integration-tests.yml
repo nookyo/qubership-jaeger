@@ -10,6 +10,16 @@ on:
   pull_request:
     branches:
     - main
+    paths-ignore:
+    - '.github/**'
+    - '.git*'
+    - '.*ignore'
+    - 'docs/**'
+    - 'CODE-OF-CONDUCT.md'
+    - 'CONTRIBUTING.md'
+    - 'LICENSE'
+    - 'README.md'
+    - 'SECURITY.md'
 
 env:
   kind_version: v0.27.0
