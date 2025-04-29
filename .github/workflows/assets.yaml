@@ -8,7 +8,7 @@ on:
         required: false
 
 jobs:
-    assets:
+    preperation:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
@@ -20,7 +20,17 @@ jobs:
                 ref: ${{ github.event.ref }}
                 tag-name: "v${{ github.event.inputs.version }}"
 
+    github-release:
+        needs: [preperation]
+        uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@main
+        with:
+            version: ${{ github.event.inputs.version }}
+            publish: false
 
+    assets:
+        needs: [github-release]
+        runs-on: ubuntu-latest
+        steps:
             - name: Assets processing
               uses: nookyo/qubership-workflow-hub/actions/archive-and-upload-assets@main
               with:
