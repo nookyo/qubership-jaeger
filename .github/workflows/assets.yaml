@@ -1,4 +1,4 @@
-name: TEst Assetst Workflow
+name: Test Assetst Workflow
 on:
   workflow_dispatch:
     inputs:
