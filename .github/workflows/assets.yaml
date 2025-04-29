@@ -21,7 +21,7 @@ jobs:
                 tag-name: "v${{ github.event.inputs.version }}"
 
 
-            - name: Load docker build components
+            - name: Assets processing
               uses: nookyo/qubership-workflow-hub/actions/archive-and-upload-assets@main
               with:
                 ref: v${{ github.event.inputs.version }}
