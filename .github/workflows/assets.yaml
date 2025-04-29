@@ -26,4 +26,5 @@ jobs:
               with:
                 ref: v${{ github.event.inputs.version }}
                 config-path: './.github/assets-config.yml'
+                upload: true
 
