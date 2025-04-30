@@ -43,26 +43,3 @@ jobs:
                 upload: true
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # github-release:
-    #     needs: [preperation]
-    #     uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@main
-    #     with:
-    #         version: ${{ github.event.inputs.version }}
-    #         publish: false
-
-    # assets:
-    #     needs: [github-release]
-    #     runs-on: ubuntu-latest
-    #     steps:
-    #         - name: Checkout code
-    #           uses: actions/checkout@v4
-
-    #         - name: Assets processing
-    #           uses: nookyo/qubership-workflow-hub/actions/archive-and-upload-assets@main
-    #           with:
-    #             ref: v${{ github.event.inputs.version }}
-    #             config-path: './.github/assets-config.yml'
-    #             upload: true
-    #           env:
-    #             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
