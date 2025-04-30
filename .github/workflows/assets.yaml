@@ -36,7 +36,7 @@ jobs:
                 RELEASE_VERSION: ${{ inputs.version }}
 
             - name: Assets processing
-              uses: nookyo/qubership-workflow-hub/actions/archive-and-upload-assets@main
+              uses: nookyo/qubership-workflow-hub/actions/assets-action@main
               with:
                 ref: v${{ github.event.inputs.version }}
                 config-path: './.github/assets-config.yml'
