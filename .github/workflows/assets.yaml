@@ -26,7 +26,7 @@ jobs:
             - name: Run Release Drafter
               uses: release-drafter/release-drafter@v6.1.0
               with:
-                config-name: './github/release-drafter-config.yml'
+                config-name: './release-drafter-config.yml'
                 publish: false
                 name: ${{ github.event.inputs.version }}
                 tag: v${{ github.event.inputs.version }}
