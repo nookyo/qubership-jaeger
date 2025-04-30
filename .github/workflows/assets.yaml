@@ -8,11 +8,13 @@ on:
         required: false
 
 jobs:
-    preperation:
+    test-assets:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
 
             - name: Create tag
               uses: nookyo/qubership-workflow-hub/actions/tag-action@main
@@ -20,19 +22,18 @@ jobs:
                 ref: ${{ github.event.ref }}
                 tag-name: "v${{ github.event.inputs.version }}"
 
-    github-release:
-        needs: [preperation]
-        uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@main
-        with:
-            version: ${{ github.event.inputs.version }}
-            publish: false
 
-    assets:
-        needs: [github-release]
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+            - name: Run Release Drafter
+              uses: release-drafter/release-drafter@v6.1.0
+              with:
+                config-name: './github/release-drafter-config.yml'
+                publish: false
+                name: ${{ github.event.inputs.version }}
+                tag: v${{ github.event.inputs.version }}
+                version: v${{ github.event.inputs.version }}
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                RELEASE_VERSION: ${{ inputs.version }}
 
             - name: Assets processing
               uses: nookyo/qubership-workflow-hub/actions/archive-and-upload-assets@main
@@ -42,3 +43,26 @@ jobs:
                 upload: true
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # github-release:
+    #     needs: [preperation]
+    #     uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@main
+    #     with:
+    #         version: ${{ github.event.inputs.version }}
+    #         publish: false
+
+    # assets:
+    #     needs: [github-release]
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - name: Checkout code
+    #           uses: actions/checkout@v4
+
+    #         - name: Assets processing
+    #           uses: nookyo/qubership-workflow-hub/actions/archive-and-upload-assets@main
+    #           with:
+    #             ref: v${{ github.event.inputs.version }}
+    #             config-path: './.github/assets-config.yml'
+    #             upload: true
+    #           env:
+    #             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
