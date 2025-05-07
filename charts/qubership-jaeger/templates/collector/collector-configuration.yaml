@@ -97,15 +97,7 @@ data:
                     username: "${env:CASSANDRA_USERNAME}"
                     password: "${env:CASSANDRA_PASSWORD}"
                     allowed_authenticators:
-                    {{- if .Values.cassandraSchemaJob.allowedAuthenticators -}}
-                    {{- range .Values.cassandraSchemaJob.allowedAuthenticators }}
-                      - {{ . }}
-                    {{- end}}
-                    {{- else }}
-                    {{- range .Values.cassandraSchemaJob.defaultAllowedAuthenticators }}
-                      - {{ . }}
-                    {{- end }}
-                    {{- end }}
+                      {{- toYaml .Values.cassandraSchemaJob.allowedAuthenticators | nindent 22 }}
           {{- else if eq .Values.jaeger.storage.type "elasticsearch" }}
           main_elasticsearch:
             elasticsearch:

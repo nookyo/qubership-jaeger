@@ -1,4 +1,5 @@
 {{- if eq .Values.jaeger.storage.type "cassandra" }}
+{{- if .Values.cassandraSchemaJob.enablePreHook -}}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -148,4 +149,5 @@ spec:
       restartPolicy: OnFailure
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
+{{- end }}
 {{- end }}
