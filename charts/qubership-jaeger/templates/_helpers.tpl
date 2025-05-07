@@ -1252,3 +1252,163 @@ Prepare args for readiness-probe container.
       {{- end -}}
     {{- end -}}
 {{- end -}}
+
+{{/*
+Generate certificate volumes for TLS configuration
+*/}}
+{{- define "jaeger.certificateVolumes" -}}
+{{- if .Values.cassandraSchemaJob.tls.enabled }}
+- name: {{ template "cassandraSchemaJob.tls.secretName" . }}
+  projected:
+    sources:
+    - secret:
+        name: {{ template "cassandraSchemaJob.tls.secretName" . }}
+        items:
+        - key: ca-cert.pem
+          path: ca-cert.pem
+        - key: client-cert.pem
+          path: client-cert.pem
+        - key: client-key.pem
+          path: client-key.pem
+{{- end }}
+{{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
+- name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
+  projected:
+    sources:
+    - secret:
+        name: {{ template "elasticsearch.tls.secretName" . }}
+        items:
+        - key: ca-cert.pem
+          path: ca-cert.pem
+        - key: client-cert.pem
+          path: client-cert.pem
+        - key: client-key.pem
+          path: client-key.pem
+{{- end }}
+{{- if and .Values.remotegRPC.tls.enabled (not .Values.remotegRPC.tls.insecureSkipVerify) }}
+- name: {{ .Values.jaeger.serviceName }}-remotegrpc-tls-assets
+  projected:
+    sources:
+    - secret:
+        name: {{ if .Values.remotegRPC.existingSecret }}{{ .Values.remotegRPC.existingSecret }}{{ else }}{{ default "jaeger-remotegrpc-tls-assets" .Values.collector.tlsConfig.newSecretName }}{{- end -}}
+        items:
+        - key: ca-cert.pem
+          path: ca-cert.pem
+        - key: client-cert.pem
+          path: client-cert.pem
+        - key: client-key.pem
+          path: client-key.pem
+{{- end }}
+{{- if or .Values.collector.tlsConfig.otelHttp.enabled
+        .Values.collector.tlsConfig.otelgRPC.enabled
+        .Values.collector.tlsConfig.jaegerHttp.enabled
+        .Values.collector.tlsConfig.jaegergRPC.enabled
+        .Values.collector.tlsConfig.zipkin.enabled }}
+- name: {{ if .Values.collector.tlsConfig.existingSecret }}{{ .Values.collector.tlsConfig.existingSecret }}{{ else }}{{ default "jaeger-collector-tls-secret" .Values.collector.tlsConfig.newSecretName }}{{ end }}
+  projected:
+    sources:
+    - secret:
+        name: {{ if .Values.collector.tlsConfig.existingSecret }}{{ .Values.collector.tlsConfig.existingSecret }}{{ else }}{{ default "jaeger-collector-tls-secret" .Values.collector.tlsConfig.newSecretName }}{{ end }}
+        items:
+        - key: ca.crt
+          path: ca.crt
+        - key: tls.crt
+          path: tls.crt
+        - key: tls.key
+          path: tls.key
+{{- end }}
+{{- end -}}
+
+{{/*
+Generate certificate volume mounts for TLS configuration
+*/}}
+{{- define "jaeger.certificateVolumeMounts" -}}
+{{- if .Values.cassandraSchemaJob.tls.enabled }}
+- name: {{ template "cassandraSchemaJob.tls.secretName" . }}
+  mountPath: "/cassandra-tls"
+  readOnly: true
+{{- end }}
+{{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
+- name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
+  mountPath: "/es-tls"
+  readOnly: true
+{{- end }}
+{{- if and .Values.remotegRPC.tls.enabled (not .Values.remotegRPC.tls.insecureSkipVerify) }}
+- name: {{ .Values.jaeger.serviceName }}-remotegrpc-tls-assets
+  mountPath: "/grpc-tls"
+  readOnly: true
+{{- end }}
+{{- if or .Values.collector.tlsConfig.otelHttp.enabled
+        .Values.collector.tlsConfig.otelgRPC.enabled
+        .Values.collector.tlsConfig.jaegerHttp.enabled
+        .Values.collector.tlsConfig.jaegergRPC.enabled
+        .Values.collector.tlsConfig.zipkin.enabled }}
+- name: {{ if .Values.collector.tlsConfig.existingSecret }}{{ .Values.collector.tlsConfig.existingSecret }}{{ else }}{{ default "jaeger-collector-tls-secret" .Values.collector.tlsConfig.newSecretName }}{{ end }}
+  mountPath: "/collector-tls"
+  readOnly: true
+{{- end }}
+{{- end -}}
+
+{{/*
+Generate certificate volumes for OpenSearch jobs TLS configuration
+*/}}
+{{- define "jaeger.opensearchCertificateVolumes" -}}
+{{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
+- name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
+  projected:
+    sources:
+    - secret:
+        name: {{ template "elasticsearch.tls.secretName" . }}
+        items:
+        - key: ca-cert.pem
+          path: ca-cert.pem
+        - key: client-cert.pem
+          path: client-cert.pem
+        - key: client-key.pem
+          path: client-key.pem
+{{- end }}
+{{- end -}}
+
+{{/*
+Generate certificate volume mounts for OpenSearch jobs TLS configuration
+*/}}
+{{- define "jaeger.opensearchCertificateVolumeMounts" -}}
+{{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
+- name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
+  mountPath: "/es-tls"
+  readOnly: true
+{{- end }}
+{{- end -}}
+
+{{/*
+Generate certificate volumes for Cassandra schema job TLS configuration
+*/}}
+{{- define "jaeger.cassandraCertificateVolumes" -}}
+{{- if .Values.cassandraSchemaJob.tls.enabled }}
+- name: {{ template "cassandraSchemaJob.tls.secretName" . }}
+  projected:
+    sources:
+    - secret:
+        name: {{ template "cassandraSchemaJob.tls.secretName" . }}
+        items:
+        - key: ca-cert.pem
+          path: ca-cert.pem
+        - key: client-cert.pem
+          path: client-cert.pem
+        - key: client-key.pem
+          path: client-key.pem
+        - key: cqlshrc
+          path: cqlshrc
+{{- end }}
+{{- end -}}
+
+{{/*
+Generate certificate volume mounts for Cassandra schema job TLS configuration
+*/}}
+{{- define "jaeger.cassandraCertificateVolumeMounts" -}}
+{{- if .Values.cassandraSchemaJob.tls.enabled }}
+- name: {{ template "cassandraSchemaJob.tls.secretName" . }}
+  mountPath: "/cassandra-tls"
+  readOnly: true
+{{- end }}
+{{- end -}}

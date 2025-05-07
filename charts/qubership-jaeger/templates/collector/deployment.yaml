@@ -86,12 +86,12 @@ spec:
             - name: ES_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.elasticsearch.existingSecret }}{{ .Values.elasticsearch.existingSecret }}{{- else }}jaeger-elasticsearch{{- end }}
+                  name: {{ .Values.elasticsearch.existingSecret | default "jaeger-elasticsearch" }}
                   key: username
             - name: ES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.elasticsearch.existingSecret }}{{ .Values.elasticsearch.existingSecret }}{{- else }}jaeger-elasticsearch{{- end }}
+                  name: {{ .Values.elasticsearch.existingSecret | default "jaeger-elasticsearch" }}
                   key: password
             {{- end }}
           livenessProbe:
@@ -174,81 +174,7 @@ spec:
             - mountPath: /conf
               name: jaeger-collector-configuration-volume
               readOnly: true
-            {{- if .Values.cassandraSchemaJob.tls.enabled }}
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/ca-cert.pem"
-              subPath: "ca-cert.pem"
-              readOnly: true
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/client-cert.pem"
-              subPath: "client-cert.pem"
-              readOnly: true
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/client-key.pem"
-              subPath: "client-key.pem"
-              readOnly: true
-            {{- end }}
-            {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/ca-cert.pem"
-              subPath: "ca-cert.pem"
-              readOnly: true
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/client-cert.pem"
-              subPath: "client-cert.pem"
-              readOnly: true
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/client-key.pem"
-              subPath: "client-key.pem"
-              readOnly: true
-            {{- end }}
-            {{- if and .Values.remotegRPC.tls.enabled (not .Values.remotegRPC.tls.insecureSkipVerify) }}
-            - name: {{ .Values.jaeger.serviceName }}-remotegrpc-tls-assets
-              mountPath: "/grpc-tls/ca-cert.pem"
-              subPath: "ca-cert.pem"
-              readOnly: true
-            - name: {{ .Values.jaeger.serviceName }}-remotegrpc-tls-assets
-              mountPath: "/grpc-tls/client-cert.pem"
-              subPath: "client-cert.pem"
-              readOnly: true
-            - name: {{ .Values.jaeger.serviceName }}-remotegrpc-tls-assets
-              mountPath: "/grpc-tls/client-key.pem"
-              subPath: "client-key.pem"
-              readOnly: true
-            {{- end }}
-            {{- if or .Values.collector.tlsConfig.otelHttp.enabled
-                    .Values.collector.tlsConfig.otelgRPC.enabled
-                    .Values.collector.tlsConfig.jaegerHttp.enabled
-                    .Values.collector.tlsConfig.jaegergRPC.enabled
-                    .Values.collector.tlsConfig.zipkin.enabled }}
-            {{- if .Values.collector.tlsConfig.existingSecret }}
-            - name: {{ .Values.collector.tlsConfig.existingSecret }}
-              mountPath: "/collector-tls/ca.crt"
-              subPath: "ca.crt"
-              readOnly: true
-            - name: {{ .Values.collector.tlsConfig.existingSecret }}
-              mountPath: "/collector-tls/tls.crt"
-              subPath: "tls.crt"
-              readOnly: true
-            - name: {{ .Values.collector.tlsConfig.existingSecret }}
-              mountPath: "/collector-tls/tls.key"
-              subPath: "tls.key"
-              readOnly: true
-            {{- else }}
-            - name: {{ default "jaeger-collector-tls-secret" .Values.collector.tlsConfig.newSecretName }}
-              mountPath: "/collector-tls/ca.crt"
-              subPath: "ca.crt"
-              readOnly: true
-            - name: {{ default "jaeger-collector-tls-secret" .Values.collector.tlsConfig.newSecretName }}
-              mountPath: "/collector-tls/tls.crt"
-              subPath: "tls.crt"
-              readOnly: true
-            - name: {{ default "jaeger-collector-tls-secret" .Values.collector.tlsConfig.newSecretName }}
-              mountPath: "/collector-tls/tls.key"
-              subPath: "tls.key"
-              readOnly: true
-            {{- end }}
-            {{- end }}
+            {{- include "jaeger.certificateVolumeMounts" . | nindent 12 }}
         {{- if .Values.readinessProbe.install }}
         - name: readiness-probe
           image: {{ template "readiness-probe.image" . }}
@@ -274,34 +200,7 @@ spec:
           securityContext:
             {{- include "readinessProbe.containerSecurityContext" . }}
           volumeMounts:
-            {{- if .Values.cassandraSchemaJob.tls.enabled }}
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/ca-cert.pem"
-              subPath: "ca-cert.pem"
-              readOnly: true
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/client-cert.pem"
-              subPath: "client-cert.pem"
-              readOnly: true
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/client-key.pem"
-              subPath: "client-key.pem"
-              readOnly: true
-            {{- end }}
-            {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/ca-cert.pem"
-              subPath: "ca-cert.pem"
-              readOnly: true
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/client-cert.pem"
-              subPath: "client-cert.pem"
-              readOnly: true
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/client-key.pem"
-              subPath: "client-key.pem"
-              readOnly: true
-            {{- end }}
+            {{- include "jaeger.certificateVolumeMounts" . | nindent 12 }}
         {{- end }}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
@@ -322,30 +221,7 @@ spec:
               - key: config.yaml
                 path: config.yaml
             defaultMode: 420
-        {{- if .Values.cassandraSchemaJob.tls.enabled }}
-        - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-          secret:
-            secretName: {{ template "cassandraSchemaJob.tls.secretName" . }}
-        {{- end }}
-        {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
-        - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-          secret:
-            secretName: {{ template "elasticsearch.tls.secretName" . }}
-        {{- end }}
-        {{- if and .Values.remotegRPC.tls.enabled (not .Values.remotegRPC.tls.insecureSkipVerify) }}
-        - name: {{ .Values.jaeger.serviceName }}-remotegrpc-tls-assets
-          secret:
-            secretName: {{ if .Values.remotegRPC.existingSecret }}{{ .Values.remotegRPC.existingSecret }}{{ else }}{{  default "jaeger-remotegrpc-tls-assets" .Values.collector.tlsConfig.newSecretName }}{{- end -}}
-        {{- end }}
-        {{- if .Values.collector.tlsConfig.existingSecret }}
-        - name: {{ .Values.collector.tlsConfig.existingSecret }}
-          secret:
-            secretName: {{ .Values.collector.tlsConfig.existingSecret }}
-        {{- else }}
-        - name: {{ default "jaeger-collector-tls-secret" .Values.collector.tlsConfig.newSecretName }}
-          secret:
-            secretName: {{  default "jaeger-collector-tls-secret" .Values.collector.tlsConfig.newSecretName }}
-        {{- end }}
+        {{- include "jaeger.certificateVolumes" . | nindent 8 }}
       {{- if .Values.collector.affinity }}
       affinity:
         {{- toYaml .Values.collector.affinity | nindent 8 }}
