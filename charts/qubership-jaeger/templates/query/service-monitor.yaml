@@ -24,6 +24,10 @@ spec:
       port: admin-http
       path: /metrics
       scheme: http
+    - interval: 30s
+      port: metrics
+      path: /metrics
+      scheme: http
     {{- if .Values.proxy.install }}
     - interval: 30s
       path: /stats/prometheus

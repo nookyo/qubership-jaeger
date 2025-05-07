@@ -83,7 +83,7 @@ data:
                   - cassandra.cassandra.svc
                   {{- end -}}
                   {{- end }}
-                port: {{- if .Values.cassandraSchemaJob.port}}{{.Values.cassandraSchemaJob.port}}{{- else }}{{- if .Values.INFRA_CASSANDRA_PORT }}{{ .Values.INFRA_CASSANDRA_PORT }}{{- else}} 9042{{- end }}{{- end }}
+                port: {{ if .Values.cassandraSchemaJob.port}}{{.Values.cassandraSchemaJob.port}}{{ else }}{{ if .Values.INFRA_CASSANDRA_PORT }}{{ .Values.INFRA_CASSANDRA_PORT }}{{ else}} 9042{{ end }}{{ end }}
                 tls:
                   {{- if .Values.cassandraSchemaJob.tls.enabled }}
                   {{- if .Values.cassandraSchemaJob.tls.insecureSkipVerify }}
@@ -100,7 +100,7 @@ data:
                     username: "${env:CASSANDRA_USERNAME}"
                     password: "${env:CASSANDRA_PASSWORD}"
                     allowed_authenticators:
-                    {{- toYaml .Values.cassandraSchemaJob.allowedAuthenticators | nindent 22 }}
+                      {{- toYaml .Values.cassandraSchemaJob.allowedAuthenticators | nindent 22 }}
           {{- else if eq .Values.jaeger.storage.type "elasticsearch" }}
           main_elasticsearch:
             elasticsearch:

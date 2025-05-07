@@ -858,6 +858,15 @@ cassandraSchemaJob:
   #
   name: cassandra-schema-job
 
+  # Enable schema initialization before deployment using Helm pre-hook.
+  # Since the Jaeger v2.x collector and/or query services can initialize the schema without the Job.
+  # Keep for compatibility with the previous versions.
+  #
+  # Type: boolean
+  # Default: false
+  #
+  enablePreHook: false
+
   # The imagePullPolicy for a container and the tag of the image affect when the kubelet
   # attempts to pull (download) the specified image.
   #   Available value : "IfNotPresent", "Always" and "Never"
@@ -874,13 +883,13 @@ cassandraSchemaJob:
   # Type: string
   # Default: "cassandra.cassandra.svc"
   #
-  host: ""
+  host: ~
 
   # This is the host used to connect to Cassandra.
   # Type: integer
   # Default: 9042
   #
-  port: ""
+  port: 9042
 
   # Name of existing secret with cassandra username and password.
   # Type: string
@@ -909,24 +918,6 @@ cassandraSchemaJob:
   # Default: []
   #
   allowedAuthenticators: []
-
-  # List of default authenticators for gocql driver
-  # This list need because in versions > 1.58 the default value of "allowedAuthenticators" is empty element
-  # need to override the default values in gocql driver
-  # Type: array[string]
-  # Default: []
-  #
-  defaultAllowedAuthenticators:
-  - org.apache.cassandra.auth.PasswordAuthenticator
-  - com.instaclustr.cassandra.auth.SharedSecretAuthenticator
-  - com.datastax.bdp.cassandra.auth.DseAuthenticator
-  - io.aiven.cassandra.auth.AivenAuthenticator
-  - com.ericsson.bss.cassandra.ecaudit.auth.AuditPasswordAuthenticator
-  - com.amazon.helenus.auth.HelenusAuthenticator
-  - com.ericsson.bss.cassandra.ecaudit.auth.AuditAuthenticator
-  - com.scylladb.auth.SaslauthdAuthenticator
-  - com.scylladb.auth.TransitionalAuthenticator
-  - com.instaclustr.cassandra.auth.InstaclustrPasswordAuthenticator
 
   tls:
     # Allow disabling create tls.
