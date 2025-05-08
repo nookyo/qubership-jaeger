@@ -1,10 +1,11 @@
 branches-template:
-- main: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{short-sha}}"
-- feature/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{short-sha}}"
-- hotfix/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{short-sha}}"
-- bugfix/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{short-sha}}"
-- fix/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{short-sha}}"
-- chore/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{short-sha}}"
-- dependabot/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{short-sha}}"
+- main: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{ref-name}}"
+- feature/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{ref-name}}"
+- bugfix/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{ref-name}}"
+- fix/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{ref-name}}"
+- chore/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{ref-name}}"
+- dependabot/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{ref-name}}"
+- ci/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{ref-name}}"
+- doc/*: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{ref-name}}"
 distribution-tags:
 - main: "main"
