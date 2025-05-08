@@ -23,6 +23,7 @@ rules:
       - daemonsets/status
     verbs:
       - get
+      - patch
   - apiGroups:
       - batch
     resources:
