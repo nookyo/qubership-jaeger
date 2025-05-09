@@ -1,51 +1,51 @@
 # Installation Notes
 
 This chapter describes the procedure to deploy the Jaeger application in the Kubernetes/OpenShift project.
-The deployment includes a collector to collect the data, a query for UI purposes, and an agent in a query pod
+The deployment includes a collector to collect the data, a query for UI purposes in a query pod
 for tracing the query.
 
 ## Table of Content
 
-* [Table of Content](#table-of-content)
-* [Prerequisites](#prerequisites)
-  * [Common](#common)
-  * [Storage](#storage)
-    * [Cassandra](#cassandra-storage)
-    * [OpenSearch/ElasticSearch](#opensearchelasticsearch)
-  * [Kubernetes](#kubernetes)
-  * [Azure](#azure)
-  * [AWS](#aws)
-  * [Google](#google)
-* [Best practices and recommendations](#best-practices-and-recommendations)
-  * [HWE](#hwe)
-  * [TLS](#tls)
-* [Parameters](#parameters)
-  * [Jaeger](#jaeger)
-  * [Collector](#collector)
-    * [Ingress](#ingress)
-    * [TLSConfig](#tlsconfig)
-  * [Query](#query)
-  * [Readiness probe](#readiness-probe)
-  * [Agent](#agent)
-  * [Cassandra](#cassandra)
-  * [ElasticSearch](#elasticsearch)
-    * [Index Cleaner](#index-cleaner)
-    * [Rollover](#rollover)
-    * [Lookback](#lookback)
-  * [Proxy](#proxy)
-  * [Hotrod](#hotrod)
-  * [Integration Tests](#integration-tests)
-  * [Status Provisioner](#status-provisioner)
-* [Installation](#installation)
-  * [Before you begin](#before-you-begin)
-    * [Helm](#helm)
-  * [On-prem](#on-prem)
-    * [HA scheme](#ha-scheme)
-    * [Non-HA scheme](#non-ha-scheme)
-* [Post Deploy Checks](#post-deploy-checks)
-  * [Smoke test](#smoke-test)
-* [Frequently Asked Questions](#frequently-asked-questions)
-  * [Jaeger Sampling Configuration](#jaeger-sampling-configuration)
+* [Installation Notes](#installation-notes)
+  * [Table of Content](#table-of-content)
+  * [Prerequisites](#prerequisites)
+    * [Common](#common)
+    * [Storage](#storage)
+      * [Cassandra Storage](#cassandra-storage)
+      * [OpenSearch/ElasticSearch](#opensearchelasticsearch)
+    * [Kubernetes](#kubernetes)
+    * [Azure](#azure)
+    * [AWS](#aws)
+    * [Google](#google)
+  * [Best practices and recommendations](#best-practices-and-recommendations)
+    * [HWE](#hwe)
+    * [TLS](#tls)
+  * [Parameters](#parameters)
+    * [Jaeger](#jaeger)
+    * [Collector](#collector)
+      * [Ingress](#ingress)
+      * [TLSConfig](#tlsconfig)
+    * [Query](#query)
+    * [Readiness probe](#readiness-probe)
+    * [Cassandra](#cassandra)
+    * [ElasticSearch](#elasticsearch)
+      * [Index Cleaner](#index-cleaner)
+      * [Rollover](#rollover)
+      * [Lookback](#lookback)
+    * [Proxy](#proxy)
+    * [Hotrod](#hotrod)
+    * [Integration Tests](#integration-tests)
+    * [Status Provisioner](#status-provisioner)
+  * [Installation](#installation)
+    * [Before you begin](#before-you-begin)
+      * [Helm](#helm)
+    * [On-prem](#on-prem)
+      * [HA scheme](#ha-scheme)
+      * [Non-HA scheme](#non-ha-scheme)
+  * [Post Deploy Checks](#post-deploy-checks)
+    * [Smoke test](#smoke-test)
+  * [Frequently Asked Questions](#frequently-asked-questions)
+    * [Jaeger Sampling Configuration](#jaeger-sampling-configuration)
 
 ## Prerequisites
 
@@ -315,9 +315,7 @@ Support matrix Jaeger as third-party:
 
 | Connection                 | Support TLS   |
 | -------------------------- | ------------- |
-| Client to Agent            | ❌ Not Support |
 | Client to Collector        | ✅ Support     |
-| Agent to Collector         | ✅ Support     |
 | Collector/Query to Storage | ✅ Support     |
 | Browser to UI              | ❌ Not Support |
 
@@ -834,127 +832,6 @@ readinessProbe:
     limits:
       cpu: 50m
       memory: 50Mi
-```
-
-<!-- #GFCFilterMarkerStart# -->
-[Back to TOC](#table-of-content)
-<!-- #GFCFilterMarkerEnd# -->
-
-### Agent
-
-**Note:** `jaeger-agent` is **deprecated**. The OpenTelemetry data can be sent directly to the Jaeger backend,
-or the OpenTelemetry Collector can be used as an agent.
-
-`jaeger-agent` is a network daemon that listens for spans sent over UDP, which are batched and sent to the collector.
-It is designed to be deployed to all hosts as an infrastructure component.
-The agent abstracts the routing and discovery of the collectors away from the client.
-
-`jaeger-agent` is **not a required** component. For example, when your applications are instrumented with OpenTelemetry,
-the SDKs can be configured to forward the trace data directly to the `jaeger-collector`.
-
-All parameters in the table below should be specified under the key:
-
-```yaml
-agent:
-  install: true
-  ...
-```
-
-<!-- markdownlint-disable line-length -->
-| Parameter                  | Type                                                                                                                          | Mandatory | Default value                                                            | Description                                                                                                                         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `install`                  | boolean                                                                                                                       | no        | false                                                                    | Enabling/disabling deploy agent daemon-set                                                                                          |
-| `image`                    | string                                                                                                                        | no        | -                                                                        | The docker image to use for an agent container                                                                                      |
-| `name`                     | string                                                                                                                        | no        | agent                                                                    | The name of a microservice to deploy with                                                                                           |
-| `imagePullPolicy`          | string                                                                                                                        | no        | IfNotPresent                                                             | `imagePullPolicy` for a container and the tag of the image affects when the kubelet attempts to pull (download) the specified image |
-| `imagePullSecrets`         | object                                                                                                                        | no        | []                                                                       | Keys to access the private registry                                                                                                 |
-| `labels`                   | map                                                                                                                           | no        | {}                                                                       | Map of string keys and values that can be used to organize and categorize (scope and select) objects                                |
-| `annotations`              | map                                                                                                                           | no        | {}                                                                       | Is an unstructured key-value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata  |
-| `useHostNetwork`           | boolean                                                                                                                       | no        | false                                                                    | Enabling using the host network                                                                                                     |
-| `useHostPort`              | boolean                                                                                                                       | no        | false                                                                    | Enabling using a host port                                                                                                          |
-| `service.zipkinThriftPort` | integer                                                                                                                       | no        | 5775                                                                     | Port to accept `zipkin.thrift` over compact thrift protocol                                                                         |
-| `service.compactPort`      | integer                                                                                                                       | no        | 6831                                                                     | Port to accept `jaeger.thrift` over compact thrift protocol                                                                         |
-| `service.binaryPort`       | integer                                                                                                                       | no        | 6832                                                                     | Port to accept `jaeger.thrift` over binary thrift protocol                                                                          |
-| `service.samplingPort`     | integer                                                                                                                       | no        | 5778                                                                     | Port for HTTP serves configs, and sampling strategies                                                                               |
-| `cmdlineParams`            | object                                                                                                                        | no        | []                                                                       | Agent-related cmd line opts to be configured on the concerned components                                                            |
-| `extraEnv`                 | object                                                                                                                        | no        | []                                                                       | Agent-related extra env vars to be configured on the concerned components                                                           |
-| `extraConfigmapMounts`     | object                                                                                                                        | no        | []                                                                       | Extra configMap mounts for the agent                                                                                                |
-| `extraSecretMounts`        | object                                                                                                                        | no        | []                                                                       | Extra secret mounts for the agent                                                                                                   |
-| `nodeSelector`             | map                                                                                                                           | no        | {}                                                                       | Defining which Nodes the Pods are scheduled on                                                                                      |
-| `tolerations`              | [core/v1.Toleration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#toleration-v1-core)                 | no        | {}                                                                       | The pods to schedule onto nodes with matching taints                                                                                |
-| `resources`                | object                                                                                                                        | no        | {requests: {cpu: 50m, memory: 50Mi}, limits: {cpu: 100m, memory: 100Mi}} | Compute resource requests and limits for single Pods                                                                                |
-| `securityContext`          | [core/v1.PodSecurityContext](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#podsecuritycontext-v1-core) | no        | {}                                                                       | Holds pod-level security attributes                                                                                                 |
-| `containerSecurityContext` | [core/v1.SecurityContext](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#securitycontext-v1-core)       | no        | {}                                                                       | Holds container-level security attributes                                                                                           |
-| `priorityClassName`        | string                                                                                                                        | no        | `-`                                                                      | PriorityClassName assigned to the Pods to prevent them from evicting.                                                               |
-<!-- markdownlint-enable line-length -->
-
-Examples:
-
-**Note:** It's just an example of a parameter's format, not recommended parameters.
-
-```yaml
-agent:
-  install: true
-  name: agent
-
-  image: jaegertracing/jaeger-agent:1.62.0
-  imagePullPolicy: IfNotPresent
-  imagePullSecrets:
-  - name: jaeger-pull-secret
-
-  labels:
-    example.label/key: example-label-value
-  annotations:
-    example.annotation/key: example-annotation-value
-
-  useHostNetwork: false
-  useHostPort: false
-
-  service:
-    zipkinThriftPort: 5775
-    compactPort: 6831
-    binaryPort: 6832
-    samplingPort: 5778
-
-  cmdlineParams:
-    - '--processor.jaeger-compact.server-queue-size=1000'
-  extraEnv:
-    - name: LOG_LEVEL
-      value: info
-  extraConfigmapMounts:
-    - name: extra-config-file-name  # name of mount in pod
-      configMap: extra-configmap-name  # name of ConfigMap in the Kubernetes
-  extraSecretMounts:
-    - name: extra-config-file-name  # name of mount in pod
-      secretMap: extra-secret-name  # name of Secret in the Kubernetes
-
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
-  securityContext:
-    runAsUser: 2000
-    fsGroup: 2000
-    runAsNonRoot: true
-    seccompProfile:
-      type: RuntimeDefault
-  containerSecurityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-
-  nodeSelector:
-    node-role.kubernetes.io/worker: worker
-  tolerations:
-    - key: key1
-      operator: Equal
-      value: value1
-      effect: NoSchedule
-  priorityClassName: priority-class
 ```
 
 <!-- #GFCFilterMarkerStart# -->
@@ -1628,8 +1505,6 @@ hotrod:
 | `annotations`              | map                                                                                                                           | no        | {}                                                                         | An unstructured key-value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata         |
 | `otelExporter.host`        | integer                                                                                                                       | no        | -                                                                          | The host used to connect to Open Telemetry Exporter                                                                                     |
 | `otelExporter.port`        | integer                                                                                                                       | no        | 14268                                                                      | The port used to connect to Open Telemetry Exporter                                                                                     |
-| `agent.host`               | integer                                                                                                                       | no        | -                                                                          | The host used to connect to the Jaeger agent. **DEPRECATED** since `1.42.x`, use parameters from the section `hotrtod.otelExporter`     |
-| `agent.port`               | integer                                                                                                                       | no        | 6831                                                                       | The port used to connect to the Jaeger agent. **DEPRECATED** since `1.42.x`, use parameters from the section `hotrtod.otelExporter`     |
 | `nodeSelector`             | map                                                                                                                           | no        | {}                                                                         | Defining which Nodes the Pods are scheduled on                                                                                          |
 | `tolerations`              | [core/v1.Toleration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#toleration-v1-core)                 | no        | {}                                                                         | The pods to schedule onto nodes with matching taints                                                                                    |
 | `ingress.install`          | boolean                                                                                                                       | no        | false                                                                      | Enabling or disabling creating a `hotrod` ingress                                                                                       |
@@ -1666,10 +1541,6 @@ hotrod:
   otelExporter:
     host: jaeger-collector
     port: 14268
-  
-  agent:
-    host: jaeger-agent
-    port: 6831
 
   # Use in Kubernetes
   ingress:
@@ -1878,8 +1749,6 @@ query:
   image: jaegertracing/jaeger-query:1.62.0
 proxy:
   image: envoyproxy/envoy:v1.25.8
-agent:
-  image: jaegertracing/jaeger-agent:1.62.0
 cassandraSchemaJob:
   image: jaegertracing/jaeger-cassandra-schema:1.62.0
 hotrod:
@@ -2012,16 +1881,13 @@ This job is created by Helm pre-hook and should be removed after successful comp
 
 Or you can use the Kubernetes Dashboard to see pods and their statuses in the UI.
 
-Thirdly, if you want to use `qubership-diagnostic-agent` to send traces from microservices to Jaeger you need to check
-that it was deployed in the namespace with an application.
-
 You can use the command:
 
 ```bash
-kubectl get pods -n <namespace> --selector=app.kubernetes.io/name=qubership-diagnostic-agent
+kubectl get pods -n <namespace> --selector=app.kubernetes.io/name=qubership-diag-proxy
 ```
 
-**Note:** Please pay attention that `qubership-diagnostic-agent` deployment and pod should be not in the namespace
+**Note:** Please pay attention that `qubership-diag-proxy` deployment and pod should be not in the namespace
 with Jaeger. It should deploy in the namespace with an application.
 
 If it is presented, you need to check that in environment variables it contains the variable:
@@ -2041,10 +1907,10 @@ For example:
 To print a list of environment variables you can use the command:
 
 ```bash
-kubectl get pods -n <namespace> --selector=app.kubernetes.io/name=qubership-diagnostic-agent -o yaml
+kubectl get pods -n <namespace> --selector=app.kubernetes.io/name=qubership-diag-proxy -o yaml
 ```
 
-Or you can use the Kubernetes Dashboard to check `qubership-diagnostic-agent` and its settings.
+Or you can use the Kubernetes Dashboard to check `qubership-diag-proxy` and its settings.
 
 Fourth, you can check that Jaeger has collected the traces using the following command:
 

@@ -32,7 +32,6 @@ Each Jaeger component exposes the metrics scraping endpoint on the admin port:
 
 | Component          | Port  |
 | ------------------ | ----- |
-| `jaeger-agent`     | 14271 |
 | `jaeger-collector` | 14269 |
 | `jaeger-query`     | 16687 |
 | `jaeger-ingester`  | 14270 |
@@ -50,7 +49,6 @@ Integration include:
 
 * ServiceMonitor for collector with name "jaeger-collector"
 * ServiceMonitor for query with name "jaeger-query"
-* ServiceMonitor for agent with name "jaeger-agent"
 * ServiceMonitor for proxy with name "proxy-service-monitor"
 * GrafanaDashboard with name "Jaeger-Overview"
 
