@@ -82,12 +82,12 @@ spec:
             - name: ES_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.elasticsearch.existingSecret }}{{ .Values.elasticsearch.existingSecret }}{{- else }}jaeger-elasticsearch{{- end }}
+                  name: {{ .Values.elasticsearch.existingSecret | default "jaeger-elasticsearch" }}
                   key: username
             - name: ES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.elasticsearch.existingSecret }}{{ .Values.elasticsearch.existingSecret }}{{- else }}jaeger-elasticsearch{{- end }}
+                  name: {{ .Values.elasticsearch.existingSecret | default "jaeger-elasticsearch" }}
                   key: password
             {{- range $key, $value := .Values.elasticsearch.env }}
             - name: {{ $key | quote }}
@@ -156,34 +156,7 @@ spec:
             - mountPath: /conf
               name: {{ .Values.jaeger.serviceName }}-query-configuration-volume
               readOnly: true
-            {{- if .Values.cassandraSchemaJob.tls.enabled }}
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/ca-cert.pem"
-              subPath: "ca-cert.pem"
-              readOnly: true
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/client-cert.pem"
-              subPath: "client-cert.pem"
-              readOnly: true
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/client-key.pem"
-              subPath: "client-key.pem"
-              readOnly: true
-            {{- end }}
-            {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/ca-cert.pem"
-              subPath: "ca-cert.pem"
-              readOnly: true
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/client-cert.pem"
-              subPath: "client-cert.pem"
-              readOnly: true
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/client-key.pem"
-              subPath: "client-key.pem"
-              readOnly: true
-            {{- end }}
+            {{- include "jaeger.certificateVolumeMounts" . | nindent 12 }}
         {{- if .Values.proxy.install }}
         - name: proxy
           image: {{ include "proxy.image" . }}
@@ -261,34 +234,7 @@ spec:
           securityContext:
             {{- include "readinessProbe.containerSecurityContext" . }}
           volumeMounts:
-            {{- if .Values.cassandraSchemaJob.tls.enabled }}
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/ca-cert.pem"
-              subPath: "ca-cert.pem"
-              readOnly: true
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/client-cert.pem"
-              subPath: "client-cert.pem"
-              readOnly: true
-            - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-              mountPath: "/cassandra-tls/client-key.pem"
-              subPath: "client-key.pem"
-              readOnly: true
-            {{- end }}
-            {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/ca-cert.pem"
-              subPath: "ca-cert.pem"
-              readOnly: true
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/client-cert.pem"
-              subPath: "client-cert.pem"
-              readOnly: true
-            - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-              mountPath: "/es-tls/client-key.pem"
-              subPath: "client-key.pem"
-              readOnly: true
-            {{- end }}
+            {{- include "jaeger.certificateVolumeMounts" . | nindent 12 }}
         {{- end }}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
@@ -320,16 +266,7 @@ spec:
             defaultMode: 420
           {{- end }}
         {{- end }}
-        {{- if .Values.cassandraSchemaJob.tls.enabled }}
-        - name: {{ template "cassandraSchemaJob.tls.secretName" . }}
-          secret:
-            secretName: {{ template "cassandraSchemaJob.tls.secretName" . }}
-        {{- end }}
-        {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
-        - name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
-          secret:
-            secretName: {{ template "elasticsearch.tls.secretName" . }}
-        {{- end }}
+        {{- include "jaeger.certificateVolumes" . | nindent 8 }}
       {{- if .Values.query.affinity }}
       affinity:
         {{- toYaml .Values.query.affinity | nindent 8 }}
