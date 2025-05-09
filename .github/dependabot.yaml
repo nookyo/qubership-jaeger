@@ -30,6 +30,13 @@ updates:
   directory: "/integration-tests"
   schedule:
     interval: "monthly"
+  groups:
+    boto3:
+      patterns:
+      - "boto*"
+    robotframework:
+      patterns:
+      - "robotframework*"
   open-pull-requests-limit: 10
   commit-message:
     prefix: chore
