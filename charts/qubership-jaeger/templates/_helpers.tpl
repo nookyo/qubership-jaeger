@@ -174,19 +174,6 @@ Image can be found from:
 {{- end -}}
 
 {{/*
-Find a jaeger-agent image in various places.
-Image can be found from:
-* from default values .Values.agent.image
-*/}}
-{{- define "agent.image" -}}
-  {{- if .Values.agent.image -}}
-    {{- printf "%s" .Values.agent.image -}}
-  {{- else -}}
-    {{- print "jaegertracing/jaeger-agent:1.62.0" -}}
-  {{- end -}}
-{{- end -}}
-
-{{/*
 Find a jaeger-cassandra-schema-job image in various places.
 Image can be found from:
 * from default values .Values.cassandraSchemaJob.image
@@ -465,28 +452,6 @@ Return password for OpenSearch/ElasticSearch.
 {{- end -}}
 
 {{/*
-Return securityContext section for Agent Container
-*/}}
-{{- define "agent.containerSecurityContext" -}}
-  {{- if ge .Capabilities.KubeVersion.Minor "25" -}}
-    {{- if .Values.agent.containerSecurityContext -}}
-      {{- toYaml .Values.agent.containerSecurityContext | nindent 10 }}
-    {{- else }}
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-    {{- end -}}
-  {{- else }}
-    {{- if .Values.agent.containerSecurityContext -}}
-      {{- toYaml .Values.agent.containerSecurityContext | nindent 10 }}
-    {{- else }}
-          {}
-    {{- end -}}
-  {{- end -}}
-{{- end -}}
-
-{{/*
 Return securityContext section for Cassandra Schema Job Container
 */}}
 {{- define "cassandraSchemaJob.containerSecurityContext" -}}
@@ -749,42 +714,6 @@ Return securityContext section for ReadinessProbe Container
 {{- end -}}
 
 {{/******************************************************************************************************************/}}
-
-{{/*
-Return securityContext section for agent pod
-*/}}
-{{- define "agent.securityContext" -}}
-  {{- if .Values.agent.securityContext }}
-    {{- toYaml .Values.agent.securityContext | nindent 8 }}
-    {{- if not (.Capabilities.APIVersions.Has "apps.openshift.io/v1") }}
-      {{- if not .Values.agent.securityContext.runAsUser }}
-        runAsUser: 2000
-      {{- end }}
-      {{- if not .Values.agent.securityContext.fsGroup }}
-        fsGroup: 2000
-      {{- end }}
-    {{- end }}
-    {{- if (eq (.Values.agent.securityContext.runAsNonRoot | toString) "false") }}
-        runAsNonRoot: false
-    {{- else }}
-        runAsNonRoot: true
-    {{- end }}
-    {{- if and (ge .Capabilities.KubeVersion.Minor "25") (not .Values.agent.securityContext.seccompProfile) }}
-        seccompProfile:
-          type: "RuntimeDefault"
-    {{- end }}
-  {{- else }}
-    {{- if not (.Capabilities.APIVersions.Has "apps.openshift.io/v1") }}
-        runAsUser: 2000
-        fsGroup: 2000
-    {{- end }}
-        runAsNonRoot: true
-    {{- if ge .Capabilities.KubeVersion.Minor "25" }}
-        seccompProfile:
-          type: "RuntimeDefault"
-    {{- end }}
-  {{- end }}
-{{- end -}}
 
 {{/*
 Return securityContext section for cassandraSchemaJob pod
@@ -1158,9 +1087,6 @@ Calculates resources that should be monitored during deployment by Deployment St
     {{- if .Values.query.install }}
         {{- printf "Deployment %s-query, " .Values.jaeger.serviceName -}}
     {{- end }}
-    {{- if .Values.agent.install }}
-        {{- printf "DaemonSet %s-agent, " .Values.jaeger.serviceName -}}
-    {{- end }}
     {{- if .Values.hotrod.install }}
         {{- printf "Deployment %s-hotrod, " .Values.jaeger.serviceName -}}
     {{- end }}
@@ -1227,9 +1153,6 @@ Prepare args for readiness-probe container.
     {{- end }}
 {{- end -}}
 {{- define "jaeger.monitoredImages" -}}
-    {{- if .Values.agent.install -}}
-      {{- printf "daemonset %s-agent %s %s, " .Values.jaeger.serviceName .Values.agent.name "jaegertracing/jaeger-agent:1.62.0" -}}
-    {{- end -}}
     {{- if .Values.collector.install -}}
       {{- printf "deployment %s-collector %s %s, " .Values.jaeger.serviceName .Values.collector.name "jaegertracing/jaeger-collector:1.62.0" -}}
       {{- if .Values.readinessProbe.install }}
