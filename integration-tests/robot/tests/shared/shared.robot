@@ -25,7 +25,7 @@ Preparation
     Set Global Variable  ${headers}
     Create Session    jaeger-query-session    http://${JAEGER_SERVICE_NAME}-query.${JAEGER_NAMESPACE}:16686
     Create Session    jaeger-collector-session    http://${JAEGER_SERVICE_NAME}-collector.${JAEGER_NAMESPACE}:9411
-    Create Session    healthcheck    http://${JAEGER_SERVICE_NAME}-collector.${JAEGER_NAMESPACE}:14269
+    Create Session    healthcheck    http://${JAEGER_SERVICE_NAME}-collector.${JAEGER_NAMESPACE}:13133
     Create Session    for-generator    ${LINK_FOR_GENERATOR}
 
 Convert Json ${json} To Type
@@ -46,7 +46,7 @@ Check Deployment State
     [Return]  ${flag}
 
 Check Jaeger Alive
-    ${resp} =  GET On Session  healthcheck  /  timeout=10
+    ${resp} =  GET On Session  healthcheck  /status  timeout=10
     Should Be Equal As Integers  ${resp.status_code}   200
     ${resp_json} =  Convert Json ${resp.content} To Type
     Dictionary Should Contain Value  ${resp_json}  Server available
