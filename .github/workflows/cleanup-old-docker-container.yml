@@ -10,14 +10,20 @@ on:
         description: "Number of days to keep container versions"
         required: false
         default: "7"
+      # Include to cleanup images for all tags, branches
+      # Using the "excluded-tags" we will remove from the delete process all images that should be saved
       included-tags:
         description: "Tags to include for deletion"
         required: false
-        default: ""
+        default: "*"
+      # Exclude (by default) from cleanup docker images the following patterns:
+      # * "main", "latest" - branch names
+      # * "release/*" - release branch names
+      # * "*.*" - tag names, like (1.2.3, etc)
       excluded-tags:
         description: "Tags to exclude from deletion"
         required: false
-        default: "release*"
+        default: "main,latest,release*,*.*"
       dry-run:
         description: "Enable dry-run mode"
         required: false
@@ -44,4 +50,4 @@ jobs:
           excluded-tags: ${{ github.event.inputs.excluded-tags || 'release*' }}
           dry-run: ${{ github.event.inputs.dry-run || 'false' }}
         env:
-          PACKAGE_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+          PACKAGE_TOKEN: ${{ secrets.GH_RWD_PACKAGE_TOKEN }}
