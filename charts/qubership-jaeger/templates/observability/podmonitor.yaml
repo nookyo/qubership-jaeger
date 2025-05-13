@@ -26,7 +26,10 @@ spec:
     scheme: http
   jobLabel: k8s
   selector:
-    matchLabels:
-      app.kubernetes.io/component: collector
-      app.kubernetes.io/name: {{ .Values.jaeger.serviceName }}-collector
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values:
+          - collector
+          - query
 {{- end }}
