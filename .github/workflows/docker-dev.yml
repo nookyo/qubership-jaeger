@@ -88,7 +88,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: ${{ fromJson(needs.load_config.outputs.components) }}
+        component: ${{ fromJson(needs.prepare.outputs.components) }}
     steps:
     - name: Docker
       uses: netcracker/qubership-workflow-hub/actions/docker-action@main
@@ -97,7 +97,7 @@ jobs:
         dry-run: ${{ inputs.dry-run }}
         download-artifact: false
         component: ${{ toJson(matrix.component) }}
-        platforms: ${{ needs.load_config.outputs.platforms }}
-        tags: ${{ needs.perform-version.outputs.metadata }}
+        platforms: ${{ needs.prepare.outputs.platforms }}
+        tags: ${{ needs.prepare.outputs.metadata }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
