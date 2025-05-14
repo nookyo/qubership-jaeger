@@ -1,5 +1,5 @@
-name: Build Docker with Matrix Strategy
-
+name: Build Docker with Matrix Strategy"
+run-name: "Build Dev Image ${{ github.run_number }} - ${{ github.actor }}"
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -31,7 +31,7 @@ jobs:
   prepare:
     permissions:
       contents: read
-    name: "Prepare Docker Images and Metadata"
+    name: "Prepare Images and Metadata"
     runs-on: ubuntu-latest
     outputs:
       components: ${{ steps.load_component.outputs.components }}
