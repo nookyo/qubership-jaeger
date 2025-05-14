@@ -73,7 +73,6 @@ jobs:
       contents: read
     outputs:
       metadata: "${{ steps.metadata.outputs.result }}"
-      tags: "${{ steps.prepare_tags.outputs.tags }}"
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -109,6 +108,6 @@ jobs:
         download-artifact: false
         component: ${{ toJson(matrix.component) }}
         platforms: ${{ needs.load_config.outputs.platforms }}
-        tags: ${{ needs.perform-version.outputs.tags }}
+        tags: ${{ needs.perform-version.outputs.metadata }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
