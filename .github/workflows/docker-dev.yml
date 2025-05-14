@@ -86,6 +86,7 @@ jobs:
         short-sha: 11
         extra-tags: ${{ github.event.inputs.tags }}
         default-template: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{short-sha}}, {{ref-name}}, {{short-sha}}"
+        default-tag: "latest"
         dry-run: ${{ inputs.dry-run }}
 
   build:
