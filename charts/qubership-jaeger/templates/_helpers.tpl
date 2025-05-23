@@ -1195,7 +1195,7 @@ Generate certificate volumes for TLS configuration
           path: client-key.pem
 {{- end }}
 {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
-- name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
+- name: {{ template "elasticsearch.tls.secretName" . }}
   projected:
     sources:
     - secret:
@@ -1277,7 +1277,7 @@ Generate certificate volumes for OpenSearch jobs TLS configuration
 */}}
 {{- define "jaeger.opensearchCertificateVolumes" -}}
 {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
-- name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
+- name: {{ template "elasticsearch.tls.secretName" . }}
   projected:
     sources:
     - secret:
@@ -1297,7 +1297,7 @@ Generate certificate volume mounts for OpenSearch jobs TLS configuration
 */}}
 {{- define "jaeger.opensearchCertificateVolumeMounts" -}}
 {{- if and .Values.elasticsearch.client.tls.enabled (not .Values.elasticsearch.client.tls.insecureSkipVerify) }}
-- name: {{ .Values.jaeger.serviceName }}-elasticsearch-tls-assets
+- name: {{ template "elasticsearch.tls.secretName" . }}
   mountPath: "/es-tls"
   readOnly: true
 {{- end }}
