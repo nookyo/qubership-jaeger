@@ -29,11 +29,6 @@ on:
         required: false
         default: true
         type: boolean
-      # snyk-scan:
-      #   description: "Snyk scan"
-      #   required: false
-      #   default: true
-      #   type: boolean
       continue-on-error:
         description: "Continue on error"
         required: false
@@ -140,7 +135,6 @@ jobs:
           name: grype.sarif
           path: grype.sarif
 
-
   trivy-scan:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs['trivy-scan'] == 'true' }}
@@ -185,11 +179,9 @@ jobs:
       - name: Filter SARIF (High+Critical only)
         if: ${{ github.event.inputs.filter_strict == 'true' }}
         run: |
-              SARIF_FILE=trivy.sarif
-              jq '.runs[].results |= map(select(((.properties.tags[]? | ascii_upcase) == "HIGH") or ((.properties.tags[]? | ascii_upcase) == "CRITICAL") or ((.help.text // "") | test("Severity: (high|critical)"; "i")) or ((.message.text // "") 
-              | test("Severity: (high|critical)"; "i"))))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif" && mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
-
-
+          SARIF_FILE=trivy.sarif
+          jq '.runs[].results |= map(select(((.properties.tags[]? | ascii_upcase) == "HIGH") or ((.properties.tags[]? | ascii_upcase) == "CRITICAL") or ((.help.text // "") | test("Severity: (high|critical)"; "i")) or ((.message.text // "") 
+          | test("Severity: (high|critical)"; "i"))))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif" && mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
 
       - name: Upload Trivy SARIF
         uses: github/codeql-action/upload-sarif@v3
@@ -201,62 +193,3 @@ jobs:
         with:
           name: trivy.sarif
           path: trivy.sarif
-
-  # snyk-scan:
-  #   runs-on: ubuntu-latest
-  #   if: ${{ github.event.inputs['snyk-scan'] == 'true' }}
-  #   needs: [init]
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-
-  #     - name: Login to GHCR (docker target)
-  #       if: ${{ github.event.inputs.target == 'docker' }}
-  #       uses: docker/login-action@v3
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-
-  #     # Docker scan
-  #     - name: "Snyk scan (Docker)"
-  #       if: ${{ github.event.inputs.target == 'docker' }}
-  #       uses: snyk/actions/docker@master
-  #       env:
-  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  #       with:
-  #         args: ${{ needs.init.outputs.image }} --file=Dockerfile --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=/github/workspace/snyk.sarif
-  #       continue-on-error: ${{ github.event.inputs['continue-on-error'] == 'true' }}
-
-  #     # Source scan
-  #     - name: "Snyk scan (Source)"
-  #       if: ${{ github.event.inputs.target == 'source' }}
-  #       uses: snyk/actions/node@master
-  #       env:
-  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  #       with:
-  #         args: --all-projects --severity-threshold=${{ env.SNYK_SEVERITY }} --sarif-file-output=/github/workspace/snyk.sarif
-  #       continue-on-error: ${{ github.event.inputs['continue-on-error'] == 'true' }}
-
-  #     # Split SARIF into multiple files (one run per file)
-  #     - name: Split SARIF into runs with unique IDs
-  #       run: |
-  #         mkdir -p sarif-splits
-  #         count=$(jq '.runs | length' snyk.sarif)
-  #         for i in $(seq 0 $((count - 1))); do
-  #           jq --argjson idx $i --arg id "snyk-$i" \
-  #             '{ version: "2.1.0", runs: [ .runs[$idx] + { automationDetails: { id: $id } } ] }' \
-  #             snyk.sarif > sarif-splits/snyk-$i.sarif
-  #           echo "Created sarif-splits/snyk-$i.sarif with automationDetails.id=snyk-$i"
-  #         done
-
-  #     - name: Upload raw Snyk SARIF
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: raw-snyk-sarif
-  #         path: snyk.sarif
-
-  #     - name: Upload Snyk SARIFs
-  #       uses: github/codeql-action/upload-sarif@v3
-  #       with:
-  #         sarif_file: sarif-splits
