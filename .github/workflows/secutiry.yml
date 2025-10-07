@@ -1,6 +1,5 @@
 name: On-demand Security Scan (Grype + Trivy)
 run-name: "Security Scan [${{ github.event.inputs.target }}, Scope: ${{ github.event.inputs.filter_strict == 'true' && 'High + Critical' || 'All' }}] by @${{ github.actor }} #${{ github.run_number }}"
-
 on:
   workflow_dispatch:
     inputs:
@@ -180,8 +179,7 @@ jobs:
         if: ${{ github.event.inputs.filter_strict == 'true' }}
         run: |
           SARIF_FILE=trivy.sarif
-          jq '.runs[].results |= map(select(((.properties.tags[]? | ascii_upcase) == "HIGH") or ((.properties.tags[]? | ascii_upcase) == "CRITICAL") or ((.help.text // "") | test("Severity: (high|critical)"; "i")) or ((.message.text // "") 
-          | test("Severity: (high|critical)"; "i"))))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif" && mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
+          jq '.runs[].results |= map(select(((.properties.tags[]? | ascii_upcase) == "HIGH") or ((.properties.tags[]? | ascii_upcase) == "CRITICAL") or ((.help.text // "") | test("Severity: (high|critical)"; "i")) or ((.message.text // "") | test("Severity: (high|critical)"; "i"))))' "$SARIF_FILE" > "${SARIF_FILE%.sarif}.filtered.sarif" && mv "${SARIF_FILE%.sarif}.filtered.sarif" "$SARIF_FILE"
 
       - name: Upload Trivy SARIF
         uses: github/codeql-action/upload-sarif@v3
