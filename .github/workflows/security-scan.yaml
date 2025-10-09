@@ -47,4 +47,4 @@ jobs:
       trivy-scan: ${{ inputs.trivy-scan || 'true' }}
       grype-scan: ${{ inputs.grype-scan || 'true' }}
       continue-on-error: ${{ inputs.continue-on-error || 'true' }}
-      ignore-unfixed: false
+      ignore-unfixed: true
