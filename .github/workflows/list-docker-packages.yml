@@ -24,6 +24,10 @@ jobs:
             "$api_url")
 
             echo "Raw response:"
-            echo "$response" | jq '[.[] | select(.repository.full_name == "nookyo/qubership-jaeger") | { name: .name, repository: .repository.name }]'
+            echo "$response" | jq '
+                [.[]
+                | select(.repository.full_name == "nookyo/qubership-jaeger")
+                | { name: .name, repository: .repository.name, full_name: .repository.full_name }]
+            '
 
        #     echo "$response" | jq .
