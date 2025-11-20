@@ -25,14 +25,16 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             "$api_url")
 
-            echo "Raw response:"
             packages=$(echo "$response" | jq -c --arg owner "$OWNER" '
                 [.[]
                 | select(.repository.full_name == "nookyo/qubership-jaeger")
                 | { name: .name, repository: .repository.name, full_name: .repository.full_name, path: "ghcr.io/\($owner)/\(.name)" }
                 ]
             ')
+
             echo "ghcr-packages=$packages" >> "$GITHUB_OUTPUT"
+            echo "Raw response:"
+            echo "$packages"
 
   create-martix:
     runs-on: ubuntu-latest
