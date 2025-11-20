@@ -36,15 +36,27 @@ jobs:
             echo "Raw response:"
             echo "$packages"
 
-  create-martix:
-    runs-on: ubuntu-latest
+  security-scan:
     needs: debug-packages
     strategy:
       matrix:
         package: ${{ fromJson(needs.debug-packages.outputs.ghcr-packages) }}
-    steps:
-      - name: Show GHCR packages for repository
-        run: |
-          echo package name: ${{ matrix.package.name }}
-          echo package repository: ${{ matrix.package.repository }}
-          echo package path: ${{ matrix.package.path }}
+
+    name: "Run Security Scan"
+    uses: nookyo/qubership-workflow-hub/.github/workflows/re-scam.yml@main
+    with:
+      target: ${{ github.event.inputs.target || 'source' }}
+      image: ${{ github.event.inputs.image || format('ghcr.io/{0}:latest', matrix.package.path) }}
+      only-high-critical: ${{ github.event.inputs.only-high-critical || true }}
+      trivy-scan: ${{ github.event.inputs.trivy-scan || true }}
+      grype-scan: ${{ github.event.inputs.grype-scan || true }}
+      only-fixed: ${{ github.event.inputs.only-fixed || true }}
+      continue-on-error: ${{ github.event.inputs.continue-on-error || true }}
+
+    # steps:
+    #   - name: Show GHCR packages for repository
+    #     run: |
+    #       github.repository
+    #       echo package name: ${{ matrix.package.name }}
+    #       echo package repository: ${{ matrix.package.repository }}
+    #       echo package path: ${{ matrix.package.path }}
