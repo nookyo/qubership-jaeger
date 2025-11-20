@@ -45,7 +45,7 @@ jobs:
     name: "Run Security Scan"
     uses: nookyo/qubership-workflow-hub/.github/workflows/re-scam.yml@main
     with:
-      target: ${{ github.event.inputs.target || 'source' }}
+      target: ${{ github.event.inputs.target || 'docker' }}
       image: ${{ github.event.inputs.image || format('ghcr.io/{0}:latest', matrix.package.path) }}
       only-high-critical: ${{ github.event.inputs.only-high-critical || true }}
       trivy-scan: ${{ github.event.inputs.trivy-scan || true }}
