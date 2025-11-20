@@ -8,9 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: read
-
+    outputs:
+      ghcr-packages: ${{ steps.pkgs.outputs.ghcr-packages }}
     steps:
       - name: Show raw GHCR response
+        id: pkgs
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_PACKAGES }}
           OWNER: ${{ github.repository_owner }}
@@ -24,17 +26,23 @@ jobs:
             "$api_url")
 
             echo "Raw response:"
-            echo "$response" | jq --arg owner "$OWNER" '
+            packages=$(echo "$response" | jq -c --arg owner "$OWNER" '
                 [.[]
                 | select(.repository.full_name == "nookyo/qubership-jaeger")
                 | { name: .name, repository: .repository.name, full_name: .repository.full_name, path: "ghcr.io/\($owner)/\(.name)" }
                 ]
-            '
-  martix:
+            ')
+            echo "ghcr-packages=$packages" >> "$GITHUB_OUTPUT"
+
+  create-martix:
     runs-on: ubuntu-latest
+    needs: debug-packages
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.debug-packages.outputs.ghcr-packages) }}
     steps:
       - name: Show GHCR packages for repository
         run: |
-          echo "This is a placeholder for matrix job."
-
-
+          echo package name: ${{ matrix.package.name }}
+          echp package repository: ${{ matrix.package.repository }}
+          echo package path: ${{ matrix.package.path }}
