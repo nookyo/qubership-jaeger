@@ -1,4 +1,4 @@
-name: List Docker Packages for Repo
+name: List Docker Packages
 
 on:
   workflow_dispatch:
@@ -7,30 +7,29 @@ jobs:
   list-packages:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       packages: read
-    steps:
-      - name: Show context
-        run: |
-          echo "Owner: ${{ github.repository_owner }}"
-          echo "Repo:  ${{ github.event.repository.name }}"
 
-      - name: List container packages for this repo
+    steps:
+      - name: List GHCR packages for this repo
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
         run: |
-          api_url="https://api.github.com/repos/${OWNER}/${REPO}/packages?package_type=container"
+          api_url="https://api.github.com/users/${OWNER}/packages?package_type=container"
 
-          echo "Request: $api_url"
-          response=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" \
-                             -H "Accept: application/vnd.github+json" \
-                             "$api_url")
+          response=$(curl -sS \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "$api_url")
 
-          echo "Raw response:"
-          echo "$response" | jq .
-
-          echo ""
-          echo "=== Packages (ghcr.io/OWNER/PACKAGE_NAME) ==="
-          echo "$response" | jq -r ".[] | \"ghcr.io/${OWNER}/\(.name)\""
+          echo "$response" | jq -r --arg owner "$OWNER" --arg repo "$REPO" '
+            if type == "array" then
+              .[]
+              # оставляем только пакеты, связанные с этим репозиторием
+              | select(.repository.full_name == ($owner + "/" + $repo))
+              | "ghcr.io/" + $owner + "/" + .name
+            else
+              empty
+            end
+          '
