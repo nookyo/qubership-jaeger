@@ -23,6 +23,5 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             "$api_url")
 
-            echo "$response" | jq -r '.[] | .name'
-        #   echo "Raw response:"
-        #   echo "$response" | jq .
+            echo "Raw response:"
+            echo "$response" | jq .
