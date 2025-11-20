@@ -24,10 +24,10 @@ jobs:
             "$api_url")
 
             echo "Raw response:"
-            echo "$response" | jq '
+            echo "$response" | jq --arg owner "$OWNER" '
                 [.[]
                 | select(.repository.full_name == "nookyo/qubership-jaeger")
-                | { name: .name, repository: .repository.name, full_name: .repository.full_name, path: "ghcr.io/\(.repository.owner.login)/\(.name)", owner: .repository.owner }
+                | { name: .name, repository: .repository.name, full_name: .repository.full_name, path: "ghcr.io/\(.repository.owner.login)/\(.name)", path2: "ghcr.io/\($owner)/\(.name)" }
                 ]
             '
 
