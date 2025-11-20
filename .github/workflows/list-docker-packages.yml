@@ -24,4 +24,6 @@ jobs:
             "$api_url")
 
             echo "Raw response:"
-            echo "$response" | jq .
+            echo "$response" | 'jq . [] | .name'
+
+       #     echo "$response" | jq .
