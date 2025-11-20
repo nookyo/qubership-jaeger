@@ -27,7 +27,8 @@ jobs:
             echo "$response" | jq '
                 [.[]
                 | select(.repository.full_name == "nookyo/qubership-jaeger")
-                | { name: .name, repository: .repository.name, full_name: .repository.full_name }]
+                | { name: .name, repository: .repository.name, full_name: .repository.full_name, path: "ghcr.io", ownewr: .repository.owner }
+                ]
             '
 
        #     echo "$response" | jq .
