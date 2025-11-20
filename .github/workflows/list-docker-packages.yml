@@ -30,5 +30,11 @@ jobs:
                 | { name: .name, repository: .repository.name, full_name: .repository.full_name, path: "ghcr.io/\($owner)/\(.name)" }
                 ]
             '
+  martix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show GHCR packages for repository
+        run: |
+          echo "This is a placeholder for matrix job."
 
-       #     echo "$response" | jq .
+
