@@ -44,5 +44,5 @@ jobs:
       - name: Show GHCR packages for repository
         run: |
           echo package name: ${{ matrix.package.name }}
-          echp package repository: ${{ matrix.package.repository }}
+          echo package repository: ${{ matrix.package.repository }}
           echo package path: ${{ matrix.package.path }}
