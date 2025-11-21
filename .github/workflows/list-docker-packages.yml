@@ -2,6 +2,15 @@ name: Debug GHCR Packages
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target type for security scan (docker, etc.)'
+        required: false
+        default: 'docker'
+      image:
+        description: 'Image to scan'
+        required: false
+        default: ''
 
 jobs:
   debug-packages:
